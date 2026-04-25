@@ -448,8 +448,8 @@ function BuddyScreen({ t, s, L }) {
 // ────────────────────────────────────────────────────────────
 // SAVED
 // ────────────────────────────────────────────────────────────
-function SavedScreen({ t, s, L, saved, onOpen, toggleSave }) {
-  const list = LOCATIONS.filter(l => saved.includes(l.id));
+function SavedScreen({ t, s, L, saved, onOpen, toggleSave, locations }) {
+  const list = (locations || LOCATIONS).filter(l => saved.includes(l.id));
   return (
     <div style={{
       position:'absolute', inset:0, background:t.bg, color:t.ink,

@@ -67,7 +67,8 @@ function PrivacyBadge({ t, s, L, onDismiss }) {
 // ────────────────────────────────────────────────────────────
 const FILTERS = ['All', 'SEP', 'Narcan', 'Test strips', 'Wound care'];
 
-function MapScreen({ t, s, L, tweaks, filter, setFilter, onOpen, saved, toggleSave, sheetLoc, setSheetLoc }) {
+function MapScreen({ t, s, L, tweaks, filter, setFilter, onOpen, saved, toggleSave, sheetLoc, setSheetLoc, locations }) {
+  const locs = locations || LOCATIONS;
   const filterLabel = (f) => {
     if (f === 'All') return L.filterAll;
     if (f === 'SEP') return L.filterSEP;
@@ -75,11 +76,11 @@ function MapScreen({ t, s, L, tweaks, filter, setFilter, onOpen, saved, toggleSa
     if (f === 'Test strips') return L.filterTest;
     if (f === 'Wound care') return L.filterWound;
   };
-  const visible = LOCATIONS.filter(l => filter === 'All' || l.services.includes(filter));
+  const visible = locs.filter(l => filter === 'All' || l.services.includes(filter));
 
   return (
     <div style={{position:'absolute', inset:0}}>
-      <MapView t={t} tweaks={tweaks} style={tweaks.mapStyle} locations={LOCATIONS}
+      <MapView t={t} tweaks={tweaks} style={tweaks.mapStyle} locations={locs}
         filter={filter} onPin={setSheetLoc}/>
 
       {/* top bar */}

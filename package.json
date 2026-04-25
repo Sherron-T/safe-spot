@@ -1,0 +1,9 @@
+{
+  "name": "safe-spot",
+  "version": "1.0.0",
+  "description": "NYC harm reduction map — syringe exchanges & naloxone programs",
+  "scripts": {
+    "start": "npx serve project -l 3000",
+    "dev": "npx serve project -l 3000 --no-clipboard"
+  }
+}
