@@ -142,7 +142,9 @@ function MapView({ t, tweaks, locations, filter, onPin }) {
   }, [visible.map(l => l.id + l.openNow).join(','), t.accent, t.mute, t.open, t.dark]);
 
   return (
-    <div ref={containerRef} style={{ position: 'absolute', inset: 0 }} />
+    <div style={{ position: 'absolute', inset: 0, isolation: 'isolate', zIndex: 0 }}>
+      <div ref={containerRef} style={{ position: 'absolute', inset: 0 }} />
+    </div>
   );
 }
 
