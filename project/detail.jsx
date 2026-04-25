@@ -73,17 +73,18 @@ function DetailScreen({ t, s, L, loc, onBack, saved, toggleSave }) {
 
         {/* primary actions */}
         <div style={{display:'flex', gap:8, marginBottom:24}}>
-          <button style={{
+          <button onClick={() => window.open('https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(loc.addr), '_blank')} style={{
             flex:2, height:s.tap+4, background:t.ink, color:t.surface,
             border:'none', borderRadius:14, display:'flex', alignItems:'center',
             justifyContent:'center', gap:8, fontFamily:'inherit',
             fontSize:s.h3, fontWeight:600, cursor:'pointer',
           }}><Icon.walk width="18" height="18"/>{L.openMaps} · {loc.walk}m</button>
-          <button style={{
+          <button onClick={() => loc.phone && (window.location.href = 'tel:' + loc.phone.replace(/\D/g,''))} style={{
             flex:1, height:s.tap+4, background:t.surface, color:t.ink,
             border:`1px solid ${t.border}`, borderRadius:14, display:'flex',
             alignItems:'center', justifyContent:'center', gap:6,
             fontFamily:'inherit', fontSize:s.h3, fontWeight:600, cursor:'pointer',
+            opacity: loc.phone ? 1 : 0.4,
           }}><Icon.phone width="16" height="16"/>{L.call}</button>
         </div>
 

@@ -175,7 +175,7 @@ function parseApiLocation(item, index) {
     services: svc,
     languages: ['EN'],
     hours: { mon: item.Hours || 'Call ahead', tue: '', wed: '', thu: '', fri: '', sat: '', sun: '' },
-    openNow: false,
+    openNow: false,   // overwritten by computeOpenNow below
     closesSoon: false,
     walk: Math.round(5 + Math.random() * 40),
     transit: Math.round(3 + Math.random() * 25),
@@ -198,7 +198,9 @@ async function fetchNYCLocations() {
     const data = await res.json();
     const items = Array.isArray(data) ? data : (data.results || data.features || data.data || []);
     if (items.length > 0) {
-      LOCATIONS = items.map(parseApiLocation).filter(l => l.name);
+      LOCATIONS = items.map(parseApiLocation)
+        .filter(l => l.name)
+        .map(l => Object.assign(l, computeOpenNow(l)));
       window.__locationsLoaded && window.__locationsLoaded(LOCATIONS);
     }
   } catch (e) {
@@ -206,6 +208,32 @@ async function fetchNYCLocations() {
     console.info('Safe Spot: using built-in seed data (API unavailable)');
   }
 }
+
+// ─── Open-now computation ──────────────────────────────────────────────────────
+function toHour24(n, isClose, openH) {
+  if (!isClose) return n <= 7 ? n + 12 : n;   // "2–10" open → 14:00
+  return n <= openH ? n + 12 : n;              // close ≤ open → PM
+}
+
+function computeOpenNow(loc) {
+  const dayKeys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+  const todayKey = dayKeys[new Date().getDay()];
+  const hoursStr = loc.hours[todayKey] || '';
+  if (!hoursStr || hoursStr === 'Closed' || hoursStr === 'Call ahead') {
+    return { openNow: false, closesSoon: false };
+  }
+  const m = hoursStr.match(/(\d+)[–\-](\d+)/);
+  if (!m) return { openNow: false, closesSoon: false };
+  const openH  = toHour24(parseInt(m[1]), false, 0);
+  const closeH = toHour24(parseInt(m[2]), true, openH);
+  const now    = new Date().getHours() + new Date().getMinutes() / 60;
+  const openNow    = now >= openH && now < closeH;
+  const closesSoon = openNow && (closeH - now) <= 1;
+  return { openNow, closesSoon };
+}
+
+// Apply computed open status to seed data
+SEED_LOCATIONS.forEach(loc => Object.assign(loc, computeOpenNow(loc)));
 
 fetchNYCLocations();
 

@@ -69,6 +69,9 @@ const FILTERS = ['All', 'SEP', 'Narcan', 'Test strips', 'Wound care'];
 
 function MapScreen({ t, s, L, tweaks, filter, setFilter, onOpen, saved, toggleSave, sheetLoc, setSheetLoc, locations }) {
   const locs = locations || LOCATIONS;
+  const [query, setQuery] = React.useState('');
+  const [searchFocused, setSearchFocused] = React.useState(false);
+
   const filterLabel = (f) => {
     if (f === 'All') return L.filterAll;
     if (f === 'SEP') return L.filterSEP;
@@ -76,7 +79,17 @@ function MapScreen({ t, s, L, tweaks, filter, setFilter, onOpen, saved, toggleSa
     if (f === 'Test strips') return L.filterTest;
     if (f === 'Wound care') return L.filterWound;
   };
-  const visible = locs.filter(l => filter === 'All' || l.services.includes(filter));
+
+  const q = query.toLowerCase().trim();
+  const visible = locs.filter(l => {
+    const matchesFilter = filter === 'All' || l.services.includes(filter);
+    const matchesQuery  = !q
+      || l.name.toLowerCase().includes(q)
+      || l.neighborhood.toLowerCase().includes(q)
+      || l.addr.toLowerCase().includes(q)
+      || l.services.some(sv => sv.toLowerCase().includes(q));
+    return matchesFilter && matchesQuery;
+  });
 
   return (
     <div style={{position:'absolute', inset:0}}>
@@ -94,17 +107,34 @@ function MapScreen({ t, s, L, tweaks, filter, setFilter, onOpen, saved, toggleSa
           display:'flex', alignItems:'center', padding:'0 14px', gap:10,
           boxShadow:'0 8px 24px rgba(0,0,0,0.10), 0 1px 2px rgba(0,0,0,0.04)',
           color:t.mute,
+          outline: searchFocused ? `2px solid ${t.accent}` : 'none',
+          outlineOffset: 1,
+          transition: 'outline 0.15s',
         }}>
           <Icon.search width="18" height="18"/>
-          <div style={{
-            flex:1, fontSize:s.body, color:t.mute,
-            fontFamily:'inherit',
-          }}>Search or filter by service</div>
-          <div style={{
-            padding:'4px 8px', background:t.accentSoft, color:t.accent,
-            borderRadius:8, fontSize:s.small,
-            fontFamily:'ui-monospace, SFMono-Regular, Menlo, monospace',
-          }}>{visible.length}</div>
+          <input
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            onFocus={() => setSearchFocused(true)}
+            onBlur={() => setSearchFocused(false)}
+            placeholder="Search by name, neighborhood…"
+            style={{
+              flex:1, border:'none', background:'transparent', outline:'none',
+              fontSize:s.body, color:t.ink, fontFamily:'inherit',
+            }}
+          />
+          {query ? (
+            <button onClick={() => setQuery('')} style={{
+              background:'transparent', border:'none', color:t.mute,
+              cursor:'pointer', display:'grid', placeItems:'center', padding:2,
+            }}><Icon.close width="14" height="14"/></button>
+          ) : (
+            <div style={{
+              padding:'4px 8px', background:t.accentSoft, color:t.accent,
+              borderRadius:8, fontSize:s.small,
+              fontFamily:'ui-monospace, SFMono-Regular, Menlo, monospace',
+            }}>{visible.length}</div>
+          )}
         </div>
 
         {/* filter chips */}
@@ -298,7 +328,7 @@ function LocationPeek({ t, s, L, loc, onOpen, onClose, saved, toggleSave }) {
       </div>
 
       <div style={{display:'flex', gap:8}}>
-        <button onClick={onOpen} style={{
+        <button onClick={() => window.open('https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(loc.addr), '_blank')} style={{
           flex:1, height:s.tap, background:t.ink, color:t.surface,
           border:'none', borderRadius:14, fontFamily:'inherit',
           fontSize:s.h3, fontWeight:600, letterSpacing:-0.2, cursor:'pointer',
