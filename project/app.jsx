@@ -20,6 +20,21 @@ function App() {
   const [detail, setDetail] = React.useState(null);
   const [saved, setSaved] = React.useState([]);
   const [locations, setLocations] = React.useState(LOCATIONS);
+  const [userLocation, setUserLocation] = React.useState(null);
+  const [locating, setLocating] = React.useState(false);
+
+  const requestLocation = React.useCallback(() => {
+    if (!navigator.geolocation) return;
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setLocating(false);
+      },
+      () => setLocating(false),
+      { timeout: 10000, maximumAge: 60000 }
+    );
+  }, []);
 
   // Pick up live data if the API fetch succeeds after mount
   React.useEffect(() => {
@@ -37,20 +52,88 @@ function App() {
 
   const updateTweak = (k, v) => setTweaks(prev => ({ ...prev, [k]: v }));
 
+  const pageBg = t.dark
+    ? 'radial-gradient(ellipse at top, oklch(0.22 0.02 40) 0%, oklch(0.14 0.01 40) 80%)'
+    : 'radial-gradient(ellipse at top, oklch(0.94 0.02 60) 0%, oklch(0.88 0.015 50) 90%)';
+
   return (
     <div style={{
-      width: '100vw', height: '100vh',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: t.dark
-        ? 'radial-gradient(ellipse at top, oklch(0.22 0.02 40) 0%, oklch(0.14 0.01 40) 80%)'
-        : 'radial-gradient(ellipse at top, oklch(0.94 0.02 60) 0%, oklch(0.88 0.015 50) 90%)',
+      minHeight: '100vh', width: '100vw',
+      background: pageBg,
       fontFamily: '"Inter", -apple-system, system-ui, sans-serif',
-      gap: 32,
-      flexWrap: 'wrap',
-      padding: 24,
-      boxSizing: 'border-box',
-      overflowY: 'auto',
+      display: 'flex', flexDirection: 'column',
+      boxSizing: 'border-box', overflowY: 'auto',
     }}>
+      {/* ── Header ── */}
+      <header style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '20px 40px', flexShrink: 0,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
+          <span style={{
+            fontFamily: '"Instrument Serif", ui-serif, Georgia, serif',
+            fontSize: 26, color: t.ink, letterSpacing: -0.5,
+          }}>Safe Spot</span>
+          <span style={{
+            fontSize: 11, color: t.mute, letterSpacing: 1.5,
+            fontFamily: 'ui-monospace, monospace',
+          }}>NYC</span>
+        </div>
+        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+          <span style={{
+            fontSize: 11, padding: '5px 12px', borderRadius: 20,
+            background: t.accentSoft, color: t.accent, fontWeight: 600, letterSpacing: 0.5,
+          }}>HACKATHON BUILD</span>
+          <a href="https://github.com/Sherron-T/safe-spot" target="_blank"
+            style={{ fontSize: 13, color: t.mute, textDecoration: 'none' }}>
+            GitHub ↗
+          </a>
+        </div>
+      </header>
+
+      {/* ── Main row: about + phone + tweaks ── */}
+      <div style={{
+        flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
+        gap: 48, padding: '0 40px 32px', flexWrap: 'wrap',
+      }}>
+        {/* About panel */}
+        <div style={{ maxWidth: 300, flexShrink: 0 }}>
+          <div style={{
+            fontFamily: '"Instrument Serif", ui-serif, Georgia, serif',
+            fontSize: 42, lineHeight: 1.05, letterSpacing: -1,
+            color: t.ink, marginBottom: 18,
+          }}>Find help,<br/>not judgment.</div>
+          <div style={{ fontSize: 15, color: t.mute, lineHeight: 1.7, marginBottom: 28 }}>
+            Safe Spot maps free harm reduction services across NYC — syringe exchanges, naloxone,
+            fentanyl test strips, and wound care. No account. No tracking. Just help.
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 32 }}>
+            {[
+              ['🗺', '20+ verified NYC sites'],
+              ['🕐', 'Live open / closed status'],
+              ['📍', 'Sort by distance from you'],
+              ['🔒', 'No account. No tracking.'],
+            ].map(([icon, text]) => (
+              <div key={text} style={{
+                display: 'flex', alignItems: 'center', gap: 10,
+                fontSize: 14, color: t.ink,
+              }}>
+                <span style={{ fontSize: 18 }}>{icon}</span>{text}
+              </div>
+            ))}
+          </div>
+          <div style={{
+            fontSize: 11, color: t.mute, lineHeight: 1.6,
+            fontFamily: 'ui-monospace, monospace',
+            padding: '12px 14px', borderRadius: 10,
+            background: t.dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
+          }}>
+            DATA SOURCE<br/>
+            NYC DOHMH Syringe Service Programs<br/>
+            NYC Health + Hospitals
+          </div>
+        </div>
+
       {/* Phone frame */}
       <IOSDevice dark={t.dark} width={390} height={844}>
         <div style={{
@@ -68,7 +151,10 @@ function App() {
               onOpen={setDetail}
               saved={saved} toggleSave={toggleSave}
               sheetLoc={sheetLoc} setSheetLoc={setSheetLoc}
-              locations={locations} />
+              locations={locations}
+              userLocation={userLocation}
+              locating={locating}
+              requestLocation={requestLocation} />
           ) : tab === 'saved' ? (
             <SavedScreen t={t} s={s} L={L} saved={saved}
               onOpen={setDetail} toggleSave={toggleSave}
@@ -105,14 +191,26 @@ function App() {
         </div>
       </IOSDevice>
 
-      {/* Tweaks panel — always visible on desktop next to the phone */}
+      {/* Tweaks panel */}
       <TweaksPanel tweaks={tweaks} update={updateTweak} />
+
+      </div>{/* end main row */}
+
+      {/* ── Footer ── */}
+      <footer style={{
+        textAlign: 'center', padding: '16px 40px',
+        fontSize: 12, color: t.mute, lineHeight: 1.6,
+        borderTop: `1px solid ${t.border}`,
+      }}>
+        Built for NYC Hackathon · Data: NYC DOHMH · No location data is stored or shared ·{' '}
+        <a href="https://github.com/Sherron-T/safe-spot" target="_blank"
+          style={{ color: t.accent, textDecoration: 'none' }}>Open source on GitHub</a>
+      </footer>
 
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&display=swap');
         * { -webkit-font-smoothing: antialiased; box-sizing: border-box; }
         ::-webkit-scrollbar { display: none; }
-        @media (max-width: 500px) { body { background: ${t.bg}; } }
       `}</style>
     </div>
   );

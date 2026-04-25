@@ -67,7 +67,7 @@ function PrivacyBadge({ t, s, L, onDismiss }) {
 // ────────────────────────────────────────────────────────────
 const FILTERS = ['All', 'SEP', 'Narcan', 'Test strips', 'Wound care'];
 
-function MapScreen({ t, s, L, tweaks, filter, setFilter, onOpen, saved, toggleSave, sheetLoc, setSheetLoc, locations }) {
+function MapScreen({ t, s, L, tweaks, filter, setFilter, onOpen, saved, toggleSave, sheetLoc, setSheetLoc, locations, userLocation, locating, requestLocation }) {
   const locs = locations || LOCATIONS;
   const [query, setQuery] = React.useState('');
   const [searchFocused, setSearchFocused] = React.useState(false);
@@ -94,7 +94,23 @@ function MapScreen({ t, s, L, tweaks, filter, setFilter, onOpen, saved, toggleSa
   return (
     <div style={{position:'absolute', inset:0}}>
       <MapView t={t} tweaks={tweaks} style={tweaks.mapStyle} locations={locs}
-        filter={filter} onPin={setSheetLoc}/>
+        filter={filter} onPin={setSheetLoc} userLocation={userLocation}/>
+
+      {/* Near me button */}
+      <button onClick={requestLocation} style={{
+        position:'absolute', right:12, top:112, zIndex:20,
+        width:40, height:40, borderRadius:20,
+        background:t.surface, border:`1px solid ${t.border}`,
+        boxShadow:'0 4px 12px rgba(0,0,0,0.12)',
+        display:'grid', placeItems:'center',
+        cursor:'pointer', color: userLocation ? t.open : t.mute,
+      }}>
+        {locating
+          ? <div style={{width:16,height:16,border:`2px solid ${t.accent}`,borderTopColor:'transparent',borderRadius:8,animation:'spin 0.7s linear infinite'}}/>
+          : <svg viewBox="0 0 24 24" fill="none" width="18" height="18"><circle cx="12" cy="12" r="3" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/><circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="1.5"/></svg>
+        }
+      </button>
+      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
 
       {/* top bar */}
       <div style={{
@@ -170,15 +186,24 @@ function MapScreen({ t, s, L, tweaks, filter, setFilter, onOpen, saved, toggleSa
           onOpen={() => onOpen(sheetLoc)}
           onClose={() => setSheetLoc(null)}
           saved={saved.includes(sheetLoc.id)}
-          toggleSave={() => toggleSave(sheetLoc.id)} />
+          toggleSave={() => toggleSave(sheetLoc.id)}
+          userLocation={userLocation} />
       ) : (
-        <NearbySheet t={t} s={s} L={L} locations={visible} onOpen={setSheetLoc}/>
+        <NearbySheet t={t} s={s} L={L} locations={visible} onOpen={setSheetLoc} userLocation={userLocation}/>
       )}
     </div>
   );
 }
 
-function NearbySheet({ t, s, L, locations, onOpen }) {
+function NearbySheet({ t, s, L, locations, onOpen, userLocation }) {
+  const sorted = React.useMemo(() => {
+    if (!userLocation) return locations;
+    return [...locations].sort((a, b) => {
+      const da = (a.lat && a.lng) ? distanceMiles(userLocation.lat, userLocation.lng, a.lat, a.lng) : 999;
+      const db = (b.lat && b.lng) ? distanceMiles(userLocation.lat, userLocation.lng, b.lat, b.lng) : 999;
+      return da - db;
+    });
+  }, [locations, userLocation]);
   return (
     <div style={{
       position:'absolute', left:0, right:0, bottom:0,
@@ -199,9 +224,12 @@ function NearbySheet({ t, s, L, locations, onOpen }) {
         }}>{L.hereNow}</div>
       </div>
       <div style={{overflowY:'auto', padding:'0 16px'}}>
-        {locations.slice(0, 6).map((l, i) => (
-          <LocationRow key={l.id} t={t} s={s} L={L} loc={l} onClick={() => onOpen(l)} last={i===locations.slice(0,6).length-1}/>
-        ))}
+        {sorted.slice(0, 8).map((l, i) => {
+          const walkMins = userLocation && l.lat && l.lng
+            ? walkMinutes(distanceMiles(userLocation.lat, userLocation.lng, l.lat, l.lng))
+            : l.walk;
+          return <LocationRow key={l.id} t={t} s={s} L={L} loc={{...l, walk: walkMins}} onClick={() => onOpen(l)} last={i===Math.min(sorted.length,8)-1}/>;
+        })}
       </div>
     </div>
   );
@@ -270,7 +298,10 @@ function OpenDot({ t, open, closesSoon }) {
 // ────────────────────────────────────────────────────────────
 // PEEK (mini card above bottom tabs when a pin is tapped)
 // ────────────────────────────────────────────────────────────
-function LocationPeek({ t, s, L, loc, onOpen, onClose, saved, toggleSave }) {
+function LocationPeek({ t, s, L, loc, onOpen, onClose, saved, toggleSave, userLocation }) {
+  const walkMins = userLocation && loc.lat && loc.lng
+    ? walkMinutes(distanceMiles(userLocation.lat, userLocation.lng, loc.lat, loc.lng))
+    : loc.walk;
   return (
     <div style={{
       position:'absolute', left:12, right:12, bottom:92,
@@ -322,7 +353,7 @@ function LocationPeek({ t, s, L, loc, onOpen, onClose, saved, toggleSave }) {
         ) : <span>{L.closed}</span>}
         <span style={{opacity:0.5}}>·</span>
         <span style={{display:'inline-flex', alignItems:'center', gap:4}}>
-          <Icon.walk width="13" height="13"/>{loc.walk} {L.walking}
+          <Icon.walk width="13" height="13"/>{walkMins} {L.walking}
         </span>
         <span style={{opacity:0.5}}>·</span>
         <span style={{display:'inline-flex', alignItems:'center', gap:4}}>

@@ -71,7 +71,7 @@ function youAreHereIcon(t) {
   });
 }
 
-function MapView({ t, tweaks, locations, filter, onPin }) {
+function MapView({ t, tweaks, locations, filter, onPin, userLocation }) {
   const containerRef = React.useRef(null);
   const mapRef      = React.useRef(null);
   const tileRef     = React.useRef(null);
@@ -127,8 +127,10 @@ function MapView({ t, tweaks, locations, filter, onPin }) {
     markersRef.current.forEach(m => mapRef.current.removeLayer(m));
     markersRef.current = [];
 
-    // "You are here" — fixed LES anchor for demo
-    const here = L.marker([40.7157, -73.9905], { icon: youAreHereIcon(t), zIndexOffset: 1000 });
+    // "You are here"
+    const hereLat = userLocation ? userLocation.lat : 40.7157;
+    const hereLng = userLocation ? userLocation.lng : -73.9905;
+    const here = L.marker([hereLat, hereLng], { icon: youAreHereIcon(t), zIndexOffset: 1000 });
     here.addTo(mapRef.current);
     markersRef.current.push(here);
 
@@ -140,6 +142,12 @@ function MapView({ t, tweaks, locations, filter, onPin }) {
       markersRef.current.push(m);
     });
   }, [visible.map(l => l.id + l.openNow).join(','), t.accent, t.mute, t.open, t.dark]);
+
+  // Fly to user when location arrives
+  React.useEffect(() => {
+    if (!mapRef.current || !userLocation) return;
+    mapRef.current.flyTo([userLocation.lat, userLocation.lng], 14, { duration: 1.4 });
+  }, [userLocation]);
 
   return (
     <div style={{ position: 'absolute', inset: 0, isolation: 'isolate', zIndex: 0 }}>
