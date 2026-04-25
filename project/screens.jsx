@@ -100,6 +100,7 @@ function MapScreen({ t, s, L, tweaks, filter, setFilter, onOpen, saved, toggleSa
       <div style={{
         position:'absolute', top:54, left:12, right:12,
         display:'flex', flexDirection:'column', gap:10,
+        zIndex: 20,
       }}>
         {/* search */}
         <div style={{
@@ -185,6 +186,7 @@ function NearbySheet({ t, s, L, locations, onOpen }) {
       boxShadow:'0 -12px 40px rgba(0,0,0,0.12)',
       padding:'10px 0 96px',
       maxHeight:'52%', display:'flex', flexDirection:'column',
+      zIndex: 20,
     }}>
       <div style={{
         width:36, height:5, background:t.border, borderRadius:3,
@@ -275,6 +277,7 @@ function LocationPeek({ t, s, L, loc, onOpen, onClose, saved, toggleSave }) {
       background:t.surface, borderRadius:24,
       boxShadow:'0 20px 50px rgba(0,0,0,0.22)',
       padding:'16px 16px 14px',
+      zIndex: 20,
     }}>
       <div style={{display:'flex', alignItems:'flex-start', gap:12, marginBottom:12}}>
         <OpenDot t={t} open={loc.openNow} closesSoon={loc.closesSoon}/>
