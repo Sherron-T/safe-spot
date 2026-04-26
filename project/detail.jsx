@@ -182,6 +182,96 @@ function dayLabel(k) {
 }
 
 // ────────────────────────────────────────────────────────────
+// STEP ILLUSTRATIONS — inline SVG for each naloxone step
+// ────────────────────────────────────────────────────────────
+function StepIllustration({ index, t }) {
+  const c = t.ink, a = t.accent, su = t.surface, ab = t.accentSoft, f = t.faint;
+  const ticks = Array.from({ length: 12 }, (_, i) => i);
+
+  const svgs = [
+    // 1 — Check for signs
+    <svg key={0} viewBox="0 0 280 120" fill="none" width="100%" height="100%">
+      <circle cx="248" cy="32" r="28" fill={ab}/>
+      <rect x="80" y="44" width="148" height="40" rx="20" fill={ab}/>
+      <circle cx="52" cy="64" r="26" fill={ab}/>
+      <path d="M40 57 Q52 51 64 57" stroke={c} strokeWidth="2" strokeLinecap="round"/>
+      <path d="M44 70 Q52 68 60 70" stroke={c} strokeWidth="1.5" strokeLinecap="round"/>
+      <path d="M72 100 H100 L107 82 L115 112 L123 73 L130 100 H210" stroke={a} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <text x="248" y="42" textAnchor="middle" fontSize="24" fontWeight="800" fill={a}>!</text>
+    </svg>,
+
+    // 2 — Call 911
+    <svg key={1} viewBox="0 0 280 120" fill="none" width="100%" height="100%">
+      <rect x="90" y="6" width="100" height="108" rx="16" fill={ab}/>
+      <rect x="90" y="6" width="100" height="108" rx="16" stroke={c} strokeWidth="2"/>
+      <rect x="102" y="20" width="76" height="72" rx="6" fill={su}/>
+      <text x="140" y="63" textAnchor="middle" fontSize="26" fontWeight="900" fill={a} fontFamily="ui-monospace, monospace">911</text>
+      <circle cx="140" cy="104" r="7" stroke={c} strokeWidth="2"/>
+      <path d="M204 42 Q222 60 204 78" stroke={a} strokeWidth="2.5" strokeLinecap="round"/>
+      <path d="M214 33 Q237 60 214 87" stroke={a} strokeWidth="2" strokeLinecap="round" opacity="0.5"/>
+    </svg>,
+
+    // 3 — Give naloxone
+    <svg key={2} viewBox="0 0 280 120" fill="none" width="100%" height="100%">
+      <ellipse cx="66" cy="58" rx="44" ry="48" fill={ab}/>
+      <path d="M107 50 Q124 53 120 66 Q116 77 107 74 Z" fill={ab} stroke={c} strokeWidth="2"/>
+      <circle cx="116" cy="68" r="4.5" fill={a}/>
+      <rect x="144" y="48" width="90" height="28" rx="14" fill={ab} stroke={a} strokeWidth="2.5"/>
+      <rect x="227" y="55" width="28" height="14" rx="7" fill={ab} stroke={a} strokeWidth="2"/>
+      <circle cx="152" cy="62" r="12" fill={su} stroke={a} strokeWidth="2"/>
+      <text x="191" y="67" textAnchor="middle" fontSize="9" fontWeight="700" fill={a} fontFamily="ui-monospace, monospace">NARCAN</text>
+      <polygon points="131,62 143,55 143,69" fill={a}/>
+    </svg>,
+
+    // 4 — Rescue breaths
+    <svg key={3} viewBox="0 0 280 120" fill="none" width="100%" height="100%">
+      <circle cx="78" cy="60" r="28" fill={ab}/>
+      <path d="M64 54 Q78 49 92 54" stroke={c} strokeWidth="2" strokeLinecap="round"/>
+      <path d="M93 79 Q104 94 100 108" stroke={c} strokeWidth="2.5" strokeLinecap="round"/>
+      <circle cx="198" cy="48" r="26" fill={ab}/>
+      <circle cx="208" cy="43" r="4" fill={c}/>
+      <path d="M172 57 Q144 50 120 61" stroke={a} strokeWidth="3" strokeLinecap="round"/>
+      <polygon points="120,61 131,53 132,66" fill={a}/>
+      <circle cx="150" cy="52" r="4" fill={a} opacity="0.35"/>
+      <circle cx="163" cy="48" r="6" fill={a} opacity="0.2"/>
+    </svg>,
+
+    // 5 — Wait & watch
+    <svg key={4} viewBox="0 0 280 120" fill="none" width="100%" height="100%">
+      <circle cx="100" cy="62" r="52" fill={ab}/>
+      <circle cx="100" cy="62" r="52" stroke={c} strokeWidth="2.5"/>
+      {ticks.map(i => {
+        const angle = (i / 12) * Math.PI * 2 - Math.PI / 2;
+        const r1 = i % 3 === 0 ? 42 : 46;
+        return <line key={i}
+          x1={100 + Math.cos(angle) * r1} y1={62 + Math.sin(angle) * r1}
+          x2={100 + Math.cos(angle) * 50} y2={62 + Math.sin(angle) * 50}
+          stroke={c} strokeWidth={i % 3 === 0 ? 2 : 1} opacity="0.5"/>;
+      })}
+      <circle cx="100" cy="62" r="4" fill={c}/>
+      <line x1="100" y1="62" x2="100" y2="22" stroke={a} strokeWidth="3.5" strokeLinecap="round"/>
+      <line x1="100" y1="62" x2="122" y2="44" stroke={c} strokeWidth="3" strokeLinecap="round"/>
+      <rect x="168" y="44" width="94" height="36" rx="12" fill={ab} stroke={a} strokeWidth="1.5"/>
+      <text x="215" y="57" textAnchor="middle" fontSize="9" fontWeight="700" fill={a} fontFamily="ui-monospace, monospace">WAIT</text>
+      <text x="215" y="73" textAnchor="middle" fontSize="13" fontWeight="800" fill={a} fontFamily="ui-monospace, monospace">2–3 MIN</text>
+    </svg>,
+
+    // 6 — Recovery position
+    <svg key={5} viewBox="0 0 280 120" fill="none" width="100%" height="100%">
+      <line x1="20" y1="107" x2="260" y2="107" stroke={c} strokeWidth="1.5" opacity="0.18"/>
+      <ellipse cx="140" cy="83" rx="58" ry="18" fill={ab} stroke={c} strokeWidth="2"/>
+      <circle cx="72" cy="72" r="22" fill={ab} stroke={c} strokeWidth="2"/>
+      <path d="M87 70 Q80 56 68 51" stroke={c} strokeWidth="3" strokeLinecap="round"/>
+      <path d="M193 80 L244 83" stroke={c} strokeWidth="6" strokeLinecap="round"/>
+      <path d="M157 71 L188 49 L221 57" stroke={a} strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
+      <text x="140" y="118" textAnchor="middle" fontSize="8" fontWeight="700" fill={a} fontFamily="ui-monospace, monospace" letterSpacing="1.5">RECOVERY POSITION</text>
+    </svg>,
+  ];
+
+  return svgs[index] || null;
+}
+
+// ────────────────────────────────────────────────────────────
 // LEARN — How to use naloxone
 // ────────────────────────────────────────────────────────────
 const NARCAN_STEPS = [
@@ -247,15 +337,14 @@ function LearnScreen({ t, s, L }) {
             {NARCAN_STEPS[step].body}
           </div>
 
-          {/* illustration placeholder */}
+          {/* step illustration */}
           <div style={{
             marginTop:20, height:140, borderRadius:16,
-            background:`repeating-linear-gradient(45deg, ${t.faint} 0 10px, ${t.surface} 10px 20px)`,
-            border:`1px dashed ${t.border}`,
-            display:'grid', placeItems:'center',
-            fontFamily:'ui-monospace, monospace', fontSize:s.small,
-            color:t.mute, letterSpacing:1,
-          }}>[ illustration: step {step+1} ]</div>
+            background:t.faint, overflow:'hidden',
+            display:'flex', alignItems:'center', justifyContent:'center',
+          }}>
+            <StepIllustration index={step} t={t}/>
+          </div>
         </div>
 
         {/* navigation */}
