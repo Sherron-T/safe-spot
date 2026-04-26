@@ -161,7 +161,7 @@ function MapView({ t, tweaks, locations, filter, onPin, userLocation, activeRout
   }, [userLocation]); // eslint-disable-line
 
   return (
-    <div style={{ position: 'absolute', inset: 0 }}>
+    <div style={{ position: 'absolute', inset: 0, isolation: 'isolate', zIndex: 0 }}>
       <div ref={elRef} style={{ position: 'absolute', inset: 0 }} />
     </div>
   );
