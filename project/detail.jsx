@@ -3,7 +3,7 @@
 // ────────────────────────────────────────────────────────────
 // LOCATION DETAIL (full-screen sheet)
 // ────────────────────────────────────────────────────────────
-function DetailScreen({ t, s, L, loc, onBack, saved, toggleSave }) {
+function DetailScreen({ t, s, L, loc, onBack, saved, toggleSave, onDirections }) {
   if (!loc) return null;
   return (
     <div style={{
@@ -73,7 +73,7 @@ function DetailScreen({ t, s, L, loc, onBack, saved, toggleSave }) {
 
         {/* primary actions */}
         <div style={{display:'flex', gap:8, marginBottom:24}}>
-          <button onClick={() => window.open('https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(loc.addr), '_blank')} style={{
+          <button onClick={() => onDirections && onDirections(loc)} style={{
             flex:2, height:s.tap+4, background:t.ink, color:t.surface,
             border:'none', borderRadius:14, display:'flex', alignItems:'center',
             justifyContent:'center', gap:8, fontFamily:'inherit',

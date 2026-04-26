@@ -71,9 +71,10 @@ function youAreHereIcon(t) {
   });
 }
 
-function MapView({ t, tweaks, locations, filter, onPin, userLocation }) {
+function MapView({ t, tweaks, locations, filter, onPin, userLocation, activeRoute }) {
   const containerRef = React.useRef(null);
   const mapRef      = React.useRef(null);
+  const routeLayerRef = React.useRef(null);
   const tileRef     = React.useRef(null);
   const markersRef  = React.useRef([]);
   const onPinRef    = React.useRef(onPin);
@@ -168,6 +169,27 @@ function MapView({ t, tweaks, locations, filter, onPin, userLocation }) {
       markersRef.current.push(cluster);
     }
   }, [visible.map(l => l.id + l.openNow).join(','), t.accent, t.mute, t.open, t.dark]);
+
+  // Draw / clear route polyline
+  React.useEffect(() => {
+    if (!mapRef.current) return;
+    if (routeLayerRef.current) {
+      mapRef.current.removeLayer(routeLayerRef.current);
+      routeLayerRef.current = null;
+    }
+    if (!activeRoute?.coords?.length) return;
+    const line = L.polyline(activeRoute.coords, {
+      color: '#3b82f6',
+      weight: 5,
+      opacity: 0.85,
+      lineJoin: 'round',
+      lineCap: 'round',
+      dashArray: null,
+    });
+    line.addTo(mapRef.current);
+    routeLayerRef.current = line;
+    mapRef.current.fitBounds(line.getBounds(), { padding: [50, 50], maxZoom: 16, animate: true, duration: 1 });
+  }, [activeRoute]);
 
   // Fly to user when location arrives
   React.useEffect(() => {

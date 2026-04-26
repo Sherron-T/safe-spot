@@ -67,7 +67,7 @@ function PrivacyBadge({ t, s, L, onDismiss }) {
 // ────────────────────────────────────────────────────────────
 const FILTERS = ['All', 'SEP', 'Narcan', 'Test strips', 'Wound care'];
 
-function MapScreen({ t, s, L, tweaks, filter, setFilter, onOpen, saved, toggleSave, sheetLoc, setSheetLoc, locations, userLocation, locating, requestLocation }) {
+function MapScreen({ t, s, L, tweaks, filter, setFilter, onOpen, saved, toggleSave, sheetLoc, setSheetLoc, locations, userLocation, locating, requestLocation, activeRoute, clearRoute }) {
   const locs = locations || LOCATIONS;
   const [query, setQuery] = React.useState('');
   const [searchFocused, setSearchFocused] = React.useState(false);
@@ -94,7 +94,8 @@ function MapScreen({ t, s, L, tweaks, filter, setFilter, onOpen, saved, toggleSa
   return (
     <div style={{position:'absolute', inset:0}}>
       <MapView t={t} tweaks={tweaks} style={tweaks.mapStyle} locations={locs}
-        filter={filter} onPin={setSheetLoc} userLocation={userLocation}/>
+        filter={filter} onPin={setSheetLoc} userLocation={userLocation}
+        activeRoute={activeRoute}/>
 
       {/* Near me button */}
       <button onClick={requestLocation} style={{

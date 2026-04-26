@@ -22,6 +22,7 @@ function App() {
   const [locations, setLocations] = React.useState(LOCATIONS);
   const [userLocation, setUserLocation] = React.useState(null);
   const [locating, setLocating] = React.useState(false);
+  const [activeRoute, setActiveRoute] = React.useState(null); // {coords,distLabel,timeLabel,mapsUrl,locName}
 
   const requestLocation = React.useCallback(() => {
     if (!navigator.geolocation) return;
@@ -45,6 +46,39 @@ function App() {
   const toggleSave = (id) => setSaved(s =>
     s.includes(id) ? s.filter(x => x !== id) : [...s, id]
   );
+
+  const handleDirections = React.useCallback(async (loc) => {
+    if (!loc.lat || !loc.lng) return;
+    const fromLat = userLocation?.lat ?? 40.7157;
+    const fromLng = userLocation?.lng ?? -73.9905;
+    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const mapsUrl = isIOS
+      ? `https://maps.apple.com/?saddr=${fromLat},${fromLng}&daddr=${loc.lat},${loc.lng}&dirflg=w`
+      : `https://www.google.com/maps/dir/?api=1&origin=${fromLat},${fromLng}&destination=${loc.lat},${loc.lng}&travelmode=walking`;
+
+    // Close detail, go to map immediately; route loads async
+    setDetail(null);
+    setTab('map');
+
+    try {
+      const url = `https://router.project-osrm.org/route/v1/walking/${fromLng},${fromLat};${loc.lng},${loc.lat}?overview=full&geometries=geojson`;
+      const res = await fetch(url);
+      const data = await res.json();
+      const route = data.routes?.[0];
+      if (!route) return;
+      const distM = route.distance;
+      const durS  = route.duration;
+      const distLabel = distM < 1000
+        ? `${Math.round(distM)} m`
+        : `${(distM / 1609.34).toFixed(1)} mi`;
+      const timeLabel = durS < 60 ? `<1 min` : `${Math.round(durS / 60)} min walk`;
+      const coords = route.geometry.coordinates.map(([lng, lat]) => [lat, lng]);
+      setActiveRoute({ coords, distLabel, timeLabel, mapsUrl, locName: loc.name });
+    } catch {
+      // OSRM unavailable — still let user open native maps
+      setActiveRoute({ coords: null, distLabel: null, timeLabel: null, mapsUrl, locName: loc.name });
+    }
+  }, [userLocation]);
 
   const t = useTokens(tweaks);
   const s = useScale(tweaks);
@@ -144,7 +178,8 @@ function App() {
             <DetailScreen key={detail.id} className="screen-enter" t={t} s={s} L={L} loc={detail}
               onBack={() => setDetail(null)}
               saved={saved.includes(detail.id)}
-              toggleSave={() => toggleSave(detail.id)} />
+              toggleSave={() => toggleSave(detail.id)}
+              onDirections={handleDirections} />
           ) : tab === 'map' ? (
             <MapScreen t={t} s={s} L={L} tweaks={tweaks}
               filter={filter} setFilter={setFilter}
@@ -154,7 +189,9 @@ function App() {
               locations={locations}
               userLocation={userLocation}
               locating={locating}
-              requestLocation={requestLocation} />
+              requestLocation={requestLocation}
+              activeRoute={activeRoute}
+              clearRoute={() => setActiveRoute(null)} />
           ) : tab === 'saved' ? (
             <SavedScreen t={t} s={s} L={L} saved={saved}
               onOpen={setDetail} toggleSave={toggleSave}
@@ -180,6 +217,49 @@ function App() {
                 fontSize: 10, color: t.mute, letterSpacing: 1.5,
                 fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
               }}>SAFE · SPOT</div>
+            </div>
+          )}
+
+          {tab === 'map' && !detail && activeRoute && (
+            <div style={{
+              position:'absolute', bottom:88, left:12, right:12, zIndex:40,
+              background: t.dark ? 'rgba(28,24,20,0.96)' : 'rgba(255,255,255,0.97)',
+              backdropFilter:'blur(14px)', WebkitBackdropFilter:'blur(14px)',
+              borderRadius:18, padding:'12px 14px',
+              boxShadow:'0 8px 28px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.06)',
+              display:'flex', alignItems:'center', gap:10,
+              animation:'screenIn 0.2s ease-out',
+            }}>
+              <div style={{
+                width:36, height:36, borderRadius:18,
+                background:t.accentSoft, color:t.accent,
+                display:'grid', placeItems:'center', flexShrink:0,
+              }}>
+                <Icon.walk width="18" height="18"/>
+              </div>
+              <div style={{flex:1, minWidth:0}}>
+                <div style={{
+                  fontSize:s.small+2, fontWeight:700, color:t.ink,
+                  whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis',
+                }}>
+                  {activeRoute.locName}
+                </div>
+                {activeRoute.distLabel && (
+                  <div style={{fontSize:s.small, color:t.mute, marginTop:1}}>
+                    {activeRoute.distLabel} · {activeRoute.timeLabel}
+                  </div>
+                )}
+              </div>
+              <button onClick={() => window.open(activeRoute.mapsUrl, '_blank')} style={{
+                height:32, padding:'0 12px', background:t.accent, color:'#fff',
+                border:'none', borderRadius:10, fontSize:s.small+1, fontWeight:600,
+                fontFamily:'inherit', cursor:'pointer', flexShrink:0, whiteSpace:'nowrap',
+              }}>Open Maps</button>
+              <button onClick={() => setActiveRoute(null)} style={{
+                width:28, height:28, borderRadius:14, background:t.surface,
+                border:`1px solid ${t.border}`, color:t.mute,
+                display:'grid', placeItems:'center', cursor:'pointer', flexShrink:0,
+              }}>✕</button>
             </div>
           )}
 
