@@ -72,7 +72,7 @@ function App() {
     };
 
     try {
-      const url = `https://router.project-osrm.org/route/v1/walking/${fromLng},${fromLat};${loc.lng},${loc.lat}?overview=full&geometries=geojson`;
+      const url = `https://routing.openstreetmap.de/routed-foot/route/v1/foot/${fromLng},${fromLat};${loc.lng},${loc.lat}?overview=full&geometries=geojson`;
       const res = await fetch(url, { signal: AbortSignal.timeout(6000) });
       const data = await res.json();
       const route = data.routes?.[0];
@@ -202,7 +202,8 @@ function App() {
               locating={locating}
               requestLocation={requestLocation}
               activeRoute={activeRoute}
-              clearRoute={() => setActiveRoute(null)} />
+              clearRoute={() => setActiveRoute(null)}
+              onDirections={handleDirections} />
           ) : tab === 'saved' ? (
             <SavedScreen t={t} s={s} L={L} saved={saved}
               onOpen={setDetail} toggleSave={toggleSave}

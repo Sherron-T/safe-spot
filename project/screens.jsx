@@ -67,7 +67,7 @@ function PrivacyBadge({ t, s, L, onDismiss }) {
 // ────────────────────────────────────────────────────────────
 const FILTERS = ['All', 'SEP', 'Narcan', 'Test strips', 'Wound care'];
 
-function MapScreen({ t, s, L, tweaks, filter, setFilter, onOpen, saved, toggleSave, sheetLoc, setSheetLoc, locations, userLocation, locating, requestLocation, activeRoute, clearRoute }) {
+function MapScreen({ t, s, L, tweaks, filter, setFilter, onOpen, saved, toggleSave, sheetLoc, setSheetLoc, locations, userLocation, locating, requestLocation, activeRoute, clearRoute, onDirections }) {
   const locs = locations || LOCATIONS;
   const [query, setQuery] = React.useState('');
   const [searchFocused, setSearchFocused] = React.useState(false);
@@ -188,7 +188,8 @@ function MapScreen({ t, s, L, tweaks, filter, setFilter, onOpen, saved, toggleSa
           onClose={() => setSheetLoc(null)}
           saved={saved.includes(sheetLoc.id)}
           toggleSave={() => toggleSave(sheetLoc.id)}
-          userLocation={userLocation} />
+          userLocation={userLocation}
+          onDirections={onDirections} />
       ) : (
         <NearbySheet t={t} s={s} L={L} locations={visible} onOpen={setSheetLoc} userLocation={userLocation}/>
       )}
@@ -306,7 +307,7 @@ function OpenDot({ t, open, closesSoon }) {
 // ────────────────────────────────────────────────────────────
 // PEEK (mini card above bottom tabs when a pin is tapped)
 // ────────────────────────────────────────────────────────────
-function LocationPeek({ t, s, L, loc, onOpen, onClose, saved, toggleSave, userLocation }) {
+function LocationPeek({ t, s, L, loc, onOpen, onClose, saved, toggleSave, userLocation, onDirections }) {
   const walkMins = userLocation && loc.lat && loc.lng
     ? walkMinutes(distanceMiles(userLocation.lat, userLocation.lng, loc.lat, loc.lng))
     : loc.walk;
@@ -370,7 +371,7 @@ function LocationPeek({ t, s, L, loc, onOpen, onClose, saved, toggleSave, userLo
       </div>
 
       <div style={{display:'flex', gap:8}}>
-        <button onClick={() => window.open('https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(loc.addr), '_blank')} style={{
+        <button onClick={() => onDirections ? onDirections(loc) : window.open('https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(loc.addr), '_blank')} style={{
           flex:1, height:s.tap, background:t.ink, color:t.surface,
           border:'none', borderRadius:14, fontFamily:'inherit',
           fontSize:s.h3, fontWeight:600, letterSpacing:-0.2, cursor:'pointer',
