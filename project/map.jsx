@@ -78,6 +78,7 @@ function MapView({ t, tweaks, locations, filter, onPin, userLocation, activeRout
   const tileRef     = React.useRef(null);
   const markersRef  = React.useRef([]);
   const onPinRef    = React.useRef(onPin);
+  const [mapReady, setMapReady] = React.useState(false);
 
   React.useEffect(() => { onPinRef.current = onPin; }, [onPin]);
 
@@ -103,12 +104,15 @@ function MapView({ t, tweaks, locations, filter, onPin, userLocation, activeRout
     tileRef.current.addTo(map);
 
     mapRef.current = map;
+    setMapReady(true);
 
     return () => {
       map.remove();
       mapRef.current = null;
       tileRef.current = null;
       markersRef.current = [];
+      routeLayerRef.current = null;
+      setMapReady(false);
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -172,7 +176,7 @@ function MapView({ t, tweaks, locations, filter, onPin, userLocation, activeRout
 
   // Draw / clear route polyline
   React.useEffect(() => {
-    if (!mapRef.current) return;
+    if (!mapReady || !mapRef.current) return;
     if (routeLayerRef.current) {
       mapRef.current.removeLayer(routeLayerRef.current);
       routeLayerRef.current = null;
@@ -184,12 +188,11 @@ function MapView({ t, tweaks, locations, filter, onPin, userLocation, activeRout
       opacity: 0.85,
       lineJoin: 'round',
       lineCap: 'round',
-      dashArray: null,
     });
     line.addTo(mapRef.current);
     routeLayerRef.current = line;
     mapRef.current.fitBounds(line.getBounds(), { padding: [50, 50], maxZoom: 16, animate: true, duration: 1 });
-  }, [activeRoute]);
+  }, [activeRoute, mapReady]);
 
   // Fly to user when location arrives
   React.useEffect(() => {

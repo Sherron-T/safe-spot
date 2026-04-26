@@ -60,23 +60,34 @@ function App() {
     setDetail(null);
     setTab('map');
 
+    // Straight-line fallback (used if OSRM fails)
+    const straightLine = () => {
+      const dLat = (loc.lat - fromLat) * Math.PI / 180;
+      const dLng = (loc.lng - fromLng) * Math.PI / 180;
+      const a = Math.sin(dLat/2)**2 + Math.cos(fromLat*Math.PI/180) * Math.cos(loc.lat*Math.PI/180) * Math.sin(dLng/2)**2;
+      const distMi = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)) * 3958.8;
+      const distLabel = distMi < 0.1 ? `${Math.round(distMi * 5280)} ft` : `${distMi.toFixed(1)} mi`;
+      const timeLabel = `~${Math.max(1, Math.round(distMi * 20))} min walk`;
+      return { coords: [[fromLat, fromLng], [loc.lat, loc.lng]], distLabel, timeLabel };
+    };
+
     try {
       const url = `https://router.project-osrm.org/route/v1/walking/${fromLng},${fromLat};${loc.lng},${loc.lat}?overview=full&geometries=geojson`;
-      const res = await fetch(url);
+      const res = await fetch(url, { signal: AbortSignal.timeout(6000) });
       const data = await res.json();
       const route = data.routes?.[0];
-      if (!route) return;
+      if (!route) throw new Error('no route');
       const distM = route.distance;
       const durS  = route.duration;
-      const distLabel = distM < 1000
+      const distLabel = distM < 1609
         ? `${Math.round(distM)} m`
         : `${(distM / 1609.34).toFixed(1)} mi`;
       const timeLabel = durS < 60 ? `<1 min` : `${Math.round(durS / 60)} min walk`;
       const coords = route.geometry.coordinates.map(([lng, lat]) => [lat, lng]);
       setActiveRoute({ coords, distLabel, timeLabel, mapsUrl, locName: loc.name });
     } catch {
-      // OSRM unavailable — still let user open native maps
-      setActiveRoute({ coords: null, distLabel: null, timeLabel: null, mapsUrl, locName: loc.name });
+      const fb = straightLine();
+      setActiveRoute({ ...fb, mapsUrl, locName: loc.name });
     }
   }, [userLocation]);
 
