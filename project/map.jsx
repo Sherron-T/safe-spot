@@ -54,15 +54,18 @@ function clusterIcon(count, t) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function MapView({ t, tweaks, locations, filter, onPin, userLocation, activeRoute }) {
-  const elRef    = React.useRef(null);
-  const mapRef   = React.useRef(null);
-  const layerRef = React.useRef({ tile: null, here: null, pins: null, route: null });
-  const onPinRef = React.useRef(onPin);
+  const elRef     = React.useRef(null);
+  const mapRef    = React.useRef(null);
+  const layerRef  = React.useRef({ tile: null, here: null, pins: null, route: null });
+  const onPinRef  = React.useRef(onPin);
+  const [ready, setReady] = React.useState(false);
 
   React.useEffect(() => { onPinRef.current = onPin; }, [onPin]);
 
-  // ── Init: useLayoutEffect fires before any useEffect, so mapRef is set ──────
-  React.useLayoutEffect(() => {
+  // ── Init map ─────────────────────────────────────────────────────────────────
+  // useEffect runs in declaration order within a render, so mapRef.current is
+  // already set by the time the tile/pin/route effects below fire.
+  React.useEffect(() => {
     if (!elRef.current || !window.L) return;
 
     const map = L.map(elRef.current, {
@@ -73,16 +76,16 @@ function MapView({ t, tweaks, locations, filter, onPin, userLocation, activeRout
     });
     map.attributionControl.setPrefix('');
     mapRef.current = map;
-
-    // Fix sizing for phone frame containers
-    setTimeout(() => map.invalidateSize(), 50);
+    setReady(true);
+    setTimeout(() => map.invalidateSize(), 100);
 
     return () => {
       map.remove();
       mapRef.current = null;
       layerRef.current = { tile: null, here: null, pins: null, route: null };
+      setReady(false);
     };
-  }, []);
+  }, []); // eslint-disable-line
 
   // ── Tile layer ───────────────────────────────────────────────────────────────
   React.useEffect(() => {
@@ -136,6 +139,8 @@ function MapView({ t, tweaks, locations, filter, onPin, userLocation, activeRout
   ]);
 
   // ── Route polyline ───────────────────────────────────────────────────────────
+  // `ready` in deps ensures this re-fires once the map initializes even if
+  // activeRoute was already set (e.g. coming back from a detail screen).
   React.useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
@@ -146,7 +151,7 @@ function MapView({ t, tweaks, locations, filter, onPin, userLocation, activeRout
       color: '#3b82f6', weight: 5, opacity: 0.9,
     }).addTo(map);
     map.fitBounds(lr.route.getBounds(), { padding: [60, 60], maxZoom: 16, animate: true, duration: 0.8 });
-  }, [activeRoute]); // eslint-disable-line
+  }, [activeRoute, ready]); // eslint-disable-line
 
   // ── Fly to user when GPS arrives ─────────────────────────────────────────────
   React.useEffect(() => {
