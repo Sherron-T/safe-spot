@@ -23,6 +23,7 @@ function App() {
   const [userLocation, setUserLocation] = React.useState(null);
   const [locating, setLocating] = React.useState(false);
   const [activeRoute, setActiveRoute] = React.useState(null); // {coords,distLabel,timeLabel,mapsUrl,locName}
+  const [routeStripVisible, setRouteStripVisible] = React.useState(false);
 
   const requestLocation = React.useCallback(() => {
     if (!navigator.geolocation) return;
@@ -85,9 +86,11 @@ function App() {
       const timeLabel = durS < 60 ? `<1 min` : `${Math.round(durS / 60)} min walk`;
       const coords = route.geometry.coordinates.map(([lng, lat]) => [lat, lng]);
       setActiveRoute({ coords, distLabel, timeLabel, mapsUrl, locName: loc.name });
+      setRouteStripVisible(true);
     } catch {
       const fb = straightLine();
       setActiveRoute({ ...fb, mapsUrl, locName: loc.name });
+      setRouteStripVisible(true);
     }
   }, [userLocation]);
 
@@ -232,9 +235,9 @@ function App() {
             </div>
           )}
 
-          {tab === 'map' && !detail && activeRoute && (
+          {tab === 'map' && !detail && activeRoute && routeStripVisible && (
             <div style={{
-              position:'absolute', bottom:88, left:12, right:12, zIndex:40,
+              position:'absolute', bottom: sheetLoc ? 300 : 88, left:12, right:12, zIndex:40,
               background: t.dark ? 'rgba(28,24,20,0.96)' : 'rgba(255,255,255,0.97)',
               backdropFilter:'blur(14px)', WebkitBackdropFilter:'blur(14px)',
               borderRadius:18, padding:'12px 14px',
@@ -267,7 +270,7 @@ function App() {
                 border:'none', borderRadius:10, fontSize:s.small+1, fontWeight:600,
                 fontFamily:'inherit', cursor:'pointer', flexShrink:0, whiteSpace:'nowrap',
               }}>Open Maps</button>
-              <button onClick={() => setActiveRoute(null)} style={{
+              <button onClick={() => setRouteStripVisible(false)} style={{
                 width:28, height:28, borderRadius:14, background:t.surface,
                 border:`1px solid ${t.border}`, color:t.mute,
                 display:'grid', placeItems:'center', cursor:'pointer', flexShrink:0,

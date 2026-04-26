@@ -99,7 +99,7 @@ function MapScreen({ t, s, L, tweaks, filter, setFilter, onOpen, saved, toggleSa
 
       {/* Near me button */}
       <button onClick={requestLocation} style={{
-        position:'absolute', right:12, top:112, zIndex:20,
+        position:'absolute', right:12, top:112, zIndex:25,
         width:40, height:40, borderRadius:20,
         background:t.surface, border:`1px solid ${t.border}`,
         boxShadow:'0 4px 12px rgba(0,0,0,0.12)',
