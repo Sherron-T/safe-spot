@@ -134,13 +134,39 @@ function MapView({ t, tweaks, locations, filter, onPin, userLocation }) {
     here.addTo(mapRef.current);
     markersRef.current.push(here);
 
+    // Cluster group
+    const cluster = window.L.markerClusterGroup
+      ? L.markerClusterGroup({
+          maxClusterRadius: 48,
+          iconCreateFunction: (c) => L.divIcon({
+            className: '',
+            iconSize: [36, 36],
+            iconAnchor: [18, 18],
+            html: `<div style="
+              width:36px;height:36px;border-radius:18px;
+              background:${t.accent};color:white;
+              display:grid;place-items:center;
+              font-family:ui-monospace,monospace;font-size:13px;font-weight:700;
+              border:2.5px solid white;
+              box-shadow:0 2px 8px rgba(0,0,0,0.25);
+            ">${c.getChildCount()}</div>`,
+          }),
+        })
+      : null;
+
     visible.forEach(loc => {
       if (!loc.lat || !loc.lng) return;
       const m = L.marker([loc.lat, loc.lng], { icon: makeIcon(loc, t) });
       m.on('click', () => onPinRef.current(loc));
-      m.addTo(mapRef.current);
+      if (cluster) cluster.addLayer(m);
+      else m.addTo(mapRef.current);
       markersRef.current.push(m);
     });
+
+    if (cluster) {
+      mapRef.current.addLayer(cluster);
+      markersRef.current.push(cluster);
+    }
   }, [visible.map(l => l.id + l.openNow).join(','), t.accent, t.mute, t.open, t.dark]);
 
   // Fly to user when location arrives

@@ -224,7 +224,14 @@ function NearbySheet({ t, s, L, locations, onOpen, userLocation }) {
         }}>{L.hereNow}</div>
       </div>
       <div style={{overflowY:'auto', padding:'0 16px'}}>
-        {sorted.slice(0, 8).map((l, i) => {
+        {sorted.length === 0 ? (
+          <div style={{padding:'32px 16px', textAlign:'center'}}>
+            <div style={{fontSize:32, marginBottom:10}}>🔍</div>
+            <div style={{fontSize:s.body, color:t.mute, lineHeight:1.5}}>
+              No sites match your search.<br/>Try a different term or clear the filter.
+            </div>
+          </div>
+        ) : sorted.slice(0, 8).map((l, i) => {
           const walkMins = userLocation && l.lat && l.lng
             ? walkMinutes(distanceMiles(userLocation.lat, userLocation.lng, l.lat, l.lng))
             : l.walk;

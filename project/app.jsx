@@ -141,7 +141,7 @@ function App() {
           color: t.ink, overflow: 'hidden',
         }}>
           {detail ? (
-            <DetailScreen t={t} s={s} L={L} loc={detail}
+            <DetailScreen key={detail.id} className="screen-enter" t={t} s={s} L={L} loc={detail}
               onBack={() => setDetail(null)}
               saved={saved.includes(detail.id)}
               toggleSave={() => toggleSave(detail.id)} />
@@ -211,6 +211,11 @@ function App() {
         @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&display=swap');
         * { -webkit-font-smoothing: antialiased; box-sizing: border-box; }
         ::-webkit-scrollbar { display: none; }
+        @keyframes screenIn {
+          from { opacity: 0; transform: translateY(12px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        .screen-enter { animation: screenIn 0.22s ease-out forwards; }
       `}</style>
     </div>
   );

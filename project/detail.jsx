@@ -287,9 +287,10 @@ function LearnScreen({ t, s, L }) {
             padding:'4px 16px',
           }}>
             {[
-              ["It can't hurt to give it.", "Even if you're not sure it's an overdose."],
-              ['NYC\'s 911 will not ask about drugs.', 'Good Samaritan Law protects you and the person.'],
-              ['Carry two doses.', 'Fentanyl sometimes needs a second one.'],
+              ["It can't hurt to give it.", "Even if you're not sure it's an overdose, naloxone won't cause harm."],
+              ["NYC's 911 won't ask about drugs.", 'Good Samaritan Law protects you and the person you help.'],
+              ['Carry two doses.', 'Fentanyl is stronger. A second dose in the other nostril may be needed after 3 min.'],
+              ['Put them in the recovery position.', 'On their side, top knee bent. Prevents choking if they vomit.'],
             ].map(([q, a], i, arr) => (
               <div key={i} style={{
                 padding:'14px 0',
@@ -299,6 +300,73 @@ function LearnScreen({ t, s, L }) {
                 <div style={{fontSize:s.small+1, color:t.mute, lineHeight:1.4}}>{a}</div>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* Good Samaritan Law */}
+        <div style={{marginTop:28}}>
+          <SectionLabel t={t} s={s}>Good Samaritan Law</SectionLabel>
+          <div style={{
+            background:t.openSoft, borderRadius:16, padding:'16px',
+            border:`1px solid ${t.open}22`,
+          }}>
+            <div style={{fontSize:s.body, fontWeight:700, color:t.open, marginBottom:8}}>
+              You are protected in NYC.
+            </div>
+            {[
+              'NY Public Health Law §3000-a covers anyone who calls 911 for an overdose.',
+              'Protects the caller and the person experiencing the overdose.',
+              'Covers possession of small amounts of drugs and paraphernalia.',
+              'You cannot be charged with or convicted of certain drug offenses.',
+            ].map((line, i) => (
+              <div key={i} style={{
+                display:'flex', gap:8, alignItems:'flex-start',
+                fontSize:s.small+1, color:t.ink, lineHeight:1.5,
+                marginBottom: i < 3 ? 8 : 0,
+              }}>
+                <Icon.check width="13" height="13" style={{color:t.open, flexShrink:0, marginTop:2}}/>
+                {line}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Fentanyl test strips */}
+        <div style={{marginTop:28, marginBottom:8}}>
+          <SectionLabel t={t} s={s}>How to use fentanyl test strips</SectionLabel>
+          <div style={{
+            background:t.surface, borderRadius:16, border:`1px solid ${t.border}`,
+            padding:'4px 16px',
+          }}>
+            {[
+              ['Mix a small residue', 'Add a teaspoon of water to the bag or surface the drug was on.'],
+              ['Dip the strip', 'Put the wavy end in the water for 15 seconds.'],
+              ['Wait 2–5 minutes', 'Lay flat on a surface. Do not touch the result window.'],
+              ['Read the result', '1 line = fentanyl detected. 2 lines = not detected. Never fully safe.'],
+            ].map(([step, desc], i, arr) => (
+              <div key={i} style={{
+                padding:'12px 0',
+                borderBottom: i < arr.length-1 ? `1px solid ${t.faint}` : 'none',
+              }}>
+                <div style={{display:'flex', gap:10, alignItems:'flex-start'}}>
+                  <div style={{
+                    width:22, height:22, borderRadius:11, background:t.accentSoft,
+                    color:t.accent, display:'grid', placeItems:'center', flexShrink:0,
+                    fontFamily:'ui-monospace, monospace', fontSize:s.small, fontWeight:700,
+                  }}>{i+1}</div>
+                  <div>
+                    <div style={{fontSize:s.body, fontWeight:600, marginBottom:2}}>{step}</div>
+                    <div style={{fontSize:s.small+1, color:t.mute, lineHeight:1.4}}>{desc}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div style={{
+            marginTop:10, padding:'10px 14px', borderRadius:10,
+            background:t.urgentSoft, fontSize:s.small+1, color:t.ink, lineHeight:1.5,
+          }}>
+            <strong>Even if the strip shows negative</strong>, fentanyl can be unevenly distributed. Never use alone.
           </div>
         </div>
       </div>
@@ -539,7 +607,7 @@ function NowScreen({ t, s, L, onGoTo }) {
       }}>Breathe.<br/>You're not alone.</div>
 
       {/* 911 */}
-      <button style={{
+      <button onClick={() => window.location.href='tel:911'} style={{
         width:'100%', padding:'22px 20px', marginBottom:10,
         borderRadius:20, background:urgent, color:'#fff',
         border:'none', textAlign:'left', cursor:'pointer',
@@ -559,6 +627,26 @@ function NowScreen({ t, s, L, onGoTo }) {
         <Icon.chevron width="18" height="18"/>
       </button>
 
+      {/* Never Use Alone hotline */}
+      <button onClick={() => window.location.href='tel:18004843731'} style={{
+        width:'100%', padding:'20px', marginBottom:10, borderRadius:20,
+        background:t.surface, color:t.ink, border:`2px solid ${t.open}`,
+        textAlign:'left', cursor:'pointer',
+        display:'flex', alignItems:'center', gap:16,
+      }}>
+        <div style={{
+          width:48, height:48, borderRadius:24, background:t.openSoft,
+          color:t.open, display:'grid', placeItems:'center', flexShrink:0,
+        }}><Icon.phone width="22" height="22"/></div>
+        <div style={{flex:1}}>
+          <div style={{fontSize:s.h3, fontWeight:700, color:t.open}}>Never Use Alone</div>
+          <div style={{fontSize:s.small+1, color:t.mute, marginTop:2}}>
+            1-800-484-3731 · Free, 24/7, judgment-free
+          </div>
+        </div>
+        <Icon.chevron width="18" height="18" style={{color:t.mute}}/>
+      </button>
+
       {/* Get naloxone now */}
       <button onClick={onGoTo?.bind(null,'map')} style={{
         width:'100%', padding:'20px', marginBottom:10, borderRadius:20,
@@ -573,7 +661,7 @@ function NowScreen({ t, s, L, onGoTo }) {
         <div style={{flex:1}}>
           <div style={{fontSize:s.h3, fontWeight:600}}>{L.getNarcan}</div>
           <div style={{fontSize:s.small+1, color:t.mute, marginTop:2}}>
-            3 places open near you · closest is 7 min
+            Find the closest open site near you
           </div>
         </div>
         <Icon.chevron width="18" height="18" style={{color:t.mute}}/>
@@ -581,7 +669,7 @@ function NowScreen({ t, s, L, onGoTo }) {
 
       {/* How to use */}
       <button onClick={onGoTo?.bind(null,'learn')} style={{
-        width:'100%', padding:'20px', marginBottom:24, borderRadius:20,
+        width:'100%', padding:'20px', marginBottom:16, borderRadius:20,
         background:t.surface, color:t.ink, border:`1px solid ${t.border}`,
         textAlign:'left', cursor:'pointer',
         display:'flex', alignItems:'center', gap:16,
