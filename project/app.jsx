@@ -127,16 +127,10 @@ function App() {
             fontFamily: 'ui-monospace, monospace',
           }}>NYC</span>
         </div>
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-          <span style={{
-            fontSize: 11, padding: '5px 12px', borderRadius: 20,
-            background: t.accentSoft, color: t.accent, fontWeight: 600, letterSpacing: 0.5,
-          }}>HACKATHON BUILD</span>
-          <a href="https://github.com/Sherron-T/safe-spot" target="_blank"
-            style={{ fontSize: 13, color: t.mute, textDecoration: 'none' }}>
-            GitHub ↗
-          </a>
-        </div>
+        <span style={{
+          fontSize: 11, padding: '5px 12px', borderRadius: 20,
+          background: t.accentSoft, color: t.accent, fontWeight: 600, letterSpacing: 0.5,
+        }}>HACKATHON BUILD</span>
       </header>
 
       {/* ── Main row: about + phone + tweaks ── */}
@@ -297,9 +291,7 @@ function App() {
         fontSize: 12, color: t.mute, lineHeight: 1.6,
         borderTop: `1px solid ${t.border}`,
       }}>
-        Built for NYC Hackathon · Data: NYC DOHMH · No location data is stored or shared ·{' '}
-        <a href="https://github.com/Sherron-T/safe-spot" target="_blank"
-          style={{ color: t.accent, textDecoration: 'none' }}>Open source on GitHub</a>
+        Built for NYC Hackathon · Data: NYC DOHMH · No location data is stored or shared
       </footer>
 
       <style>{`
@@ -431,21 +423,6 @@ function TweaksPanel({ tweaks, update }) {
         <Chip active={tweaks.mode === 'dark'} onClick={() => update('mode', 'dark')}>Dark</Chip>
       </Row>
 
-      <Row label="Color theme">
-        <Chip active={tweaks.theme === 'warm'} onClick={() => update('theme', 'warm')}
-          swatch="oklch(0.62 0.14 40)">Warm</Chip>
-        <Chip active={tweaks.theme === 'clinical'} onClick={() => update('theme', 'clinical')}
-          swatch="oklch(0.55 0.14 245)">Clinical</Chip>
-        <Chip active={tweaks.theme === 'activist'} onClick={() => update('theme', 'activist')}
-          swatch="oklch(0.80 0.16 75)">Activist</Chip>
-      </Row>
-
-      <Row label="Map style">
-        <Chip active={tweaks.mapStyle === 'realistic'} onClick={() => update('mapStyle', 'realistic')}>Realistic</Chip>
-        <Chip active={tweaks.mapStyle === 'abstract'} onClick={() => update('mapStyle', 'abstract')}>Abstract</Chip>
-        <Chip active={tweaks.mapStyle === 'schematic'} onClick={() => update('mapStyle', 'schematic')}>Schematic</Chip>
-      </Row>
-
       <Row label="Language">
         <Chip active={tweaks.lang === 'EN'} onClick={() => update('lang', 'EN')}>EN</Chip>
         <Chip active={tweaks.lang === 'ES'} onClick={() => update('lang', 'ES')}>ES</Chip>
@@ -455,11 +432,6 @@ function TweaksPanel({ tweaks, update }) {
       <Row label="Text size">
         <Chip active={!tweaks.bigText} onClick={() => update('bigText', false)}>Normal</Chip>
         <Chip active={tweaks.bigText} onClick={() => update('bigText', true)}>Large</Chip>
-      </Row>
-
-      <Row label="Density">
-        <Chip active={tweaks.density === 'comfortable'} onClick={() => update('density', 'comfortable')}>Comfortable</Chip>
-        <Chip active={tweaks.density === 'compact'} onClick={() => update('density', 'compact')}>Compact</Chip>
       </Row>
     </div>
   );
