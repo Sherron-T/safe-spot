@@ -146,7 +146,7 @@ function App() {
             color: t.ink, marginBottom: 18,
           }}>Find help,<br/>not judgment.</div>
           <div style={{ fontSize: 15, color: t.mute, lineHeight: 1.7, marginBottom: 28 }}>
-            Safe Spot maps free harm reduction services across NYC — syringe exchanges, naloxone,
+            Safe Spot maps free harm reduction services across NYC: syringe exchanges, naloxone,
             fentanyl test strips, and wound care. No account. No tracking. Just help.
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 32 }}>
