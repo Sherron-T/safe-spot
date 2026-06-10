@@ -321,11 +321,17 @@ function LocationPeek({ t, s, L, loc, onOpen, onClose, saved, toggleSave, userLo
     }}>
       <div style={{display:'flex', alignItems:'flex-start', gap:12, marginBottom:12}}>
         <OpenDot t={t} open={loc.openNow} closesSoon={loc.closesSoon}/>
-        <div style={{flex:1, minWidth:0}}>
+        <div style={{flex:1, minWidth:0, cursor:'pointer'}} onClick={onOpen}>
           <div style={{
+            display:'flex', alignItems:'center', gap:6,
             fontFamily:'"Instrument Serif", ui-serif, Georgia, serif',
             fontSize:s.h2, letterSpacing:-0.3, color:t.ink, lineHeight:1.1,
-          }}>{loc.name}</div>
+          }}>
+            <span>{loc.name}</span>
+            <span style={{color:t.mute, flexShrink:0, display:'inline-flex'}}>
+              <Icon.chevron width="14" height="14"/>
+            </span>
+          </div>
           <div style={{fontSize:s.small+1, color:t.mute, marginTop:4}}>
             {loc.addr} · {loc.neighborhood}
           </div>

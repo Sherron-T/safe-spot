@@ -130,7 +130,7 @@ function App() {
         <span style={{
           fontSize: 11, padding: '5px 12px', borderRadius: 20,
           background: t.accentSoft, color: t.accent, fontWeight: 600, letterSpacing: 0.5,
-        }}>HACKATHON BUILD</span>
+        }}>YALE HACKATHON</span>
       </header>
 
       {/* ── Main row: about + phone + tweaks ── */}
@@ -144,23 +144,27 @@ function App() {
             fontFamily: '"Instrument Serif", ui-serif, Georgia, serif',
             fontSize: 42, lineHeight: 1.05, letterSpacing: -1,
             color: t.ink, marginBottom: 18,
-          }}>Find help,<br/>not judgment.</div>
+          }}>Free harm reduction,<br/>mapped across NYC.</div>
           <div style={{ fontSize: 15, color: t.mute, lineHeight: 1.7, marginBottom: 28 }}>
             Safe Spot maps free harm reduction services across NYC: syringe exchanges, naloxone,
-            fentanyl test strips, and wound care. No account. No tracking. Just help.
+            fentanyl test strips, and wound care. No account, no tracking.
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 32 }}>
             {[
-              ['🗺', '20+ verified NYC sites'],
-              ['🕐', 'Live open / closed status'],
-              ['📍', 'Sort by distance from you'],
-              ['🔒', 'No account. No tracking.'],
+              ['map', '20+ verified NYC sites'],
+              ['bolt', 'Live open / closed status'],
+              ['walk', 'Sorted by distance from you'],
+              ['lock', 'No account, no tracking'],
             ].map(([icon, text]) => (
               <div key={text} style={{
                 display: 'flex', alignItems: 'center', gap: 10,
                 fontSize: 14, color: t.ink,
               }}>
-                <span style={{ fontSize: 18 }}>{icon}</span>{text}
+                <span style={{
+                  width: 28, height: 28, borderRadius: 8, flexShrink: 0,
+                  background: t.accentSoft, color: t.accent,
+                  display: 'grid', placeItems: 'center',
+                }}>{Icon[icon]({ width: 15, height: 15 })}</span>{text}
               </div>
             ))}
           </div>
@@ -291,7 +295,7 @@ function App() {
         fontSize: 12, color: t.mute, lineHeight: 1.6,
         borderTop: `1px solid ${t.border}`,
       }}>
-        Built for NYC Hackathon · Data: NYC DOHMH · No location data is stored or shared
+        Built at the Yale Hackathon · Data: NYC DOHMH · No location data is stored or shared
       </footer>
 
       <style>{`

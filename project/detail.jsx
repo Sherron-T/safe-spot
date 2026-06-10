@@ -10,17 +10,20 @@ function DetailScreen({ t, s, L, loc, onBack, saved, toggleSave, onDirections })
       position:'absolute', inset:0, background:t.bg, color:t.ink,
       overflowY:'auto', display:'flex', flexDirection:'column',
     }}>
-      {/* header image (placeholder stripe) */}
+      {/* header band */}
       <div style={{
-        position:'relative', height:200, flexShrink:0,
-        background:`repeating-linear-gradient(135deg, ${t.accentSoft} 0 18px, ${t.surface} 18px 36px)`,
-        borderBottom:`1px solid ${t.border}`,
+        position:'relative', height:128, flexShrink:0,
+        background:`linear-gradient(180deg, ${t.accentSoft} 0%, ${t.bg} 100%)`,
       }}>
+        {/* watermark icon for the site's primary service */}
         <div style={{
-          position:'absolute', inset:0, display:'grid', placeItems:'center',
-          fontFamily:'ui-monospace, SFMono-Regular, Menlo, monospace',
-          fontSize:s.small, color:t.mute, letterSpacing:1,
-        }}>[ storefront photo ]</div>
+          position:'absolute', right:24, bottom:-2, color:t.accent, opacity:0.16,
+        }}>
+          {(() => {
+            const meta = SERVICE_META[loc.services[0]];
+            return meta ? Icon[meta.icon]({ width: 96, height: 96 }) : null;
+          })()}
+        </div>
 
         {/* back + save */}
         <div style={{
@@ -185,86 +188,78 @@ function dayLabel(k) {
 // STEP ILLUSTRATIONS — inline SVG for each naloxone step
 // ────────────────────────────────────────────────────────────
 function StepIllustration({ index, t }) {
-  const c = t.ink, a = t.accent, su = t.surface, ab = t.accentSoft, f = t.faint;
-  const ticks = Array.from({ length: 12 }, (_, i) => i);
+  const c = t.ink, a = t.accent, su = t.surface, ab = t.accentSoft;
 
   const svgs = [
-    // 1 — Check for signs
+    // 1 — Check for signs: unresponsive face + alert
     <svg key={0} viewBox="0 0 280 120" fill="none" width="100%" height="100%">
-      <circle cx="248" cy="32" r="28" fill={ab}/>
-      <rect x="80" y="44" width="148" height="40" rx="20" fill={ab}/>
-      <circle cx="52" cy="64" r="26" fill={ab}/>
-      <path d="M40 57 Q52 51 64 57" stroke={c} strokeWidth="2" strokeLinecap="round"/>
-      <path d="M44 70 Q52 68 60 70" stroke={c} strokeWidth="1.5" strokeLinecap="round"/>
-      <path d="M72 100 H100 L107 82 L115 112 L123 73 L130 100 H210" stroke={a} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-      <text x="248" y="42" textAnchor="middle" fontSize="24" fontWeight="800" fill={a}>!</text>
+      <circle cx="104" cy="60" r="38" fill={ab} stroke={c} strokeWidth="2.5"/>
+      <path d="M86 54 q7 6 14 0" stroke={c} strokeWidth="2.5" strokeLinecap="round" fill="none"/>
+      <path d="M108 54 q7 6 14 0" stroke={c} strokeWidth="2.5" strokeLinecap="round" fill="none"/>
+      <line x1="96" y1="76" x2="112" y2="76" stroke={c} strokeWidth="2.5" strokeLinecap="round"/>
+      <path d="M196 32 L224 80 H168 Z" fill={su} stroke={a} strokeWidth="2.5" strokeLinejoin="round"/>
+      <line x1="196" y1="48" x2="196" y2="62" stroke={a} strokeWidth="3.5" strokeLinecap="round"/>
+      <circle cx="196" cy="71" r="2.5" fill={a}/>
     </svg>,
 
-    // 2 — Call 911
+    // 2 — Call 911: phone + ring waves
     <svg key={1} viewBox="0 0 280 120" fill="none" width="100%" height="100%">
-      <rect x="90" y="6" width="100" height="108" rx="16" fill={ab}/>
-      <rect x="90" y="6" width="100" height="108" rx="16" stroke={c} strokeWidth="2"/>
-      <rect x="102" y="20" width="76" height="72" rx="6" fill={su}/>
-      <text x="140" y="63" textAnchor="middle" fontSize="26" fontWeight="900" fill={a} fontFamily="ui-monospace, monospace">911</text>
-      <circle cx="140" cy="104" r="7" stroke={c} strokeWidth="2"/>
-      <path d="M204 42 Q222 60 204 78" stroke={a} strokeWidth="2.5" strokeLinecap="round"/>
-      <path d="M214 33 Q237 60 214 87" stroke={a} strokeWidth="2" strokeLinecap="round" opacity="0.5"/>
+      <rect x="112" y="10" width="56" height="100" rx="14" fill={su} stroke={c} strokeWidth="2.5"/>
+      <rect x="121" y="24" width="38" height="58" rx="5" fill={ab}/>
+      <text x="140" y="59" textAnchor="middle" fontSize="16" fontWeight="800" fill={a} fontFamily="ui-monospace, monospace">911</text>
+      <line x1="132" y1="98" x2="148" y2="98" stroke={c} strokeWidth="2.5" strokeLinecap="round"/>
+      <path d="M184 44 Q198 60 184 76" stroke={a} strokeWidth="2.5" strokeLinecap="round" fill="none"/>
+      <path d="M196 35 Q216 60 196 85" stroke={a} strokeWidth="2.5" strokeLinecap="round" fill="none" opacity="0.45"/>
     </svg>,
 
-    // 3 — Give naloxone
+    // 3 — Give naloxone: spray device aimed at nostril, head tilted back
     <svg key={2} viewBox="0 0 280 120" fill="none" width="100%" height="100%">
-      <ellipse cx="66" cy="58" rx="44" ry="48" fill={ab}/>
-      <path d="M107 50 Q124 53 120 66 Q116 77 107 74 Z" fill={ab} stroke={c} strokeWidth="2"/>
-      <circle cx="116" cy="68" r="4.5" fill={a}/>
-      <rect x="144" y="48" width="90" height="28" rx="14" fill={ab} stroke={a} strokeWidth="2.5"/>
-      <rect x="227" y="55" width="28" height="14" rx="7" fill={ab} stroke={a} strokeWidth="2"/>
-      <circle cx="152" cy="62" r="12" fill={su} stroke={a} strokeWidth="2"/>
-      <text x="191" y="67" textAnchor="middle" fontSize="9" fontWeight="700" fill={a} fontFamily="ui-monospace, monospace">NARCAN</text>
-      <polygon points="131,62 143,55 143,69" fill={a}/>
+      <circle cx="174" cy="44" r="30" fill={ab} stroke={c} strokeWidth="2.5"/>
+      <circle cx="168" cy="56" r="2.2" fill={c}/>
+      <circle cx="180" cy="56" r="2.2" fill={c}/>
+      <path d="M160 36 q6 -5 12 0" stroke={c} strokeWidth="2" strokeLinecap="round" fill="none"/>
+      <g transform="rotate(-24 116 90)">
+        <rect x="108" y="84" width="16" height="24" rx="6" fill={su} stroke={a} strokeWidth="2.5"/>
+        <rect x="112" y="68" width="8" height="16" rx="4" fill={ab} stroke={a} strokeWidth="2"/>
+      </g>
+      <path d="M130 66 Q148 56 162 52" stroke={a} strokeWidth="2.5" strokeDasharray="2 6" strokeLinecap="round" fill="none"/>
     </svg>,
 
-    // 4 — Rescue breaths
+    // 4 — Rescue breaths: breath flowing into open mouth
     <svg key={3} viewBox="0 0 280 120" fill="none" width="100%" height="100%">
-      <circle cx="78" cy="60" r="28" fill={ab}/>
-      <path d="M64 54 Q78 49 92 54" stroke={c} strokeWidth="2" strokeLinecap="round"/>
-      <path d="M93 79 Q104 94 100 108" stroke={c} strokeWidth="2.5" strokeLinecap="round"/>
-      <circle cx="198" cy="48" r="26" fill={ab}/>
-      <circle cx="208" cy="43" r="4" fill={c}/>
-      <path d="M172 57 Q144 50 120 61" stroke={a} strokeWidth="3" strokeLinecap="round"/>
-      <polygon points="120,61 131,53 132,66" fill={a}/>
-      <circle cx="150" cy="52" r="4" fill={a} opacity="0.35"/>
-      <circle cx="163" cy="48" r="6" fill={a} opacity="0.2"/>
+      <circle cx="184" cy="60" r="32" fill={ab} stroke={c} strokeWidth="2.5"/>
+      <path d="M176 48 q6 -5 12 0" stroke={c} strokeWidth="2" strokeLinecap="round" fill="none"/>
+      <circle cx="156" cy="66" r="5" fill={su} stroke={c} strokeWidth="2.5"/>
+      <path d="M62 66 H136" stroke={a} strokeWidth="3" strokeLinecap="round"/>
+      <path d="M128 56 L144 66 L128 76" stroke={a} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+      <circle cx="86" cy="56" r="5" fill={a} opacity="0.25"/>
+      <circle cx="108" cy="76" r="7" fill={a} opacity="0.15"/>
     </svg>,
 
-    // 5 — Wait & watch
+    // 5 — Wait & watch: clock with a 2–3 minute wedge
     <svg key={4} viewBox="0 0 280 120" fill="none" width="100%" height="100%">
-      <circle cx="100" cy="62" r="52" fill={ab}/>
-      <circle cx="100" cy="62" r="52" stroke={c} strokeWidth="2.5"/>
-      {ticks.map(i => {
-        const angle = (i / 12) * Math.PI * 2 - Math.PI / 2;
-        const r1 = i % 3 === 0 ? 42 : 46;
-        return <line key={i}
-          x1={100 + Math.cos(angle) * r1} y1={62 + Math.sin(angle) * r1}
-          x2={100 + Math.cos(angle) * 50} y2={62 + Math.sin(angle) * 50}
-          stroke={c} strokeWidth={i % 3 === 0 ? 2 : 1} opacity="0.5"/>;
-      })}
-      <circle cx="100" cy="62" r="4" fill={c}/>
-      <line x1="100" y1="62" x2="100" y2="22" stroke={a} strokeWidth="3.5" strokeLinecap="round"/>
-      <line x1="100" y1="62" x2="122" y2="44" stroke={c} strokeWidth="3" strokeLinecap="round"/>
-      <rect x="168" y="44" width="94" height="36" rx="12" fill={ab} stroke={a} strokeWidth="1.5"/>
-      <text x="215" y="57" textAnchor="middle" fontSize="9" fontWeight="700" fill={a} fontFamily="ui-monospace, monospace">WAIT</text>
-      <text x="215" y="73" textAnchor="middle" fontSize="13" fontWeight="800" fill={a} fontFamily="ui-monospace, monospace">2–3 MIN</text>
+      <circle cx="108" cy="60" r="44" fill={su} stroke={c} strokeWidth="2.5"/>
+      <path d="M108 60 L108 22 A38 38 0 0 1 141 41 Z" fill={ab}/>
+      <line x1="108" y1="60" x2="108" y2="28" stroke={c} strokeWidth="3" strokeLinecap="round"/>
+      <line x1="108" y1="60" x2="134" y2="46" stroke={a} strokeWidth="3.5" strokeLinecap="round"/>
+      <circle cx="108" cy="60" r="3.5" fill={c}/>
+      <line x1="108" y1="20" x2="108" y2="26" stroke={c} strokeWidth="2" opacity="0.4"/>
+      <line x1="148" y1="60" x2="142" y2="60" stroke={c} strokeWidth="2" opacity="0.4"/>
+      <line x1="108" y1="100" x2="108" y2="94" stroke={c} strokeWidth="2" opacity="0.4"/>
+      <line x1="68" y1="60" x2="74" y2="60" stroke={c} strokeWidth="2" opacity="0.4"/>
+      <text x="206" y="56" textAnchor="middle" fontSize="20" fontWeight="800" fill={a} fontFamily="ui-monospace, monospace">2–3</text>
+      <text x="206" y="74" textAnchor="middle" fontSize="11" fontWeight="600" fill={c} opacity="0.6" fontFamily="ui-monospace, monospace">MINUTES</text>
     </svg>,
 
-    // 6 — Recovery position
+    // 6 — Recovery position: figure on side, top knee bent
     <svg key={5} viewBox="0 0 280 120" fill="none" width="100%" height="100%">
-      <line x1="20" y1="107" x2="260" y2="107" stroke={c} strokeWidth="1.5" opacity="0.18"/>
-      <ellipse cx="140" cy="83" rx="58" ry="18" fill={ab} stroke={c} strokeWidth="2"/>
-      <circle cx="72" cy="72" r="22" fill={ab} stroke={c} strokeWidth="2"/>
-      <path d="M87 70 Q80 56 68 51" stroke={c} strokeWidth="3" strokeLinecap="round"/>
-      <path d="M193 80 L244 83" stroke={c} strokeWidth="6" strokeLinecap="round"/>
-      <path d="M157 71 L188 49 L221 57" stroke={a} strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
-      <text x="140" y="118" textAnchor="middle" fontSize="8" fontWeight="700" fill={a} fontFamily="ui-monospace, monospace" letterSpacing="1.5">RECOVERY POSITION</text>
+      <line x1="28" y1="100" x2="252" y2="100" stroke={c} strokeWidth="2" opacity="0.2" strokeLinecap="round"/>
+      <circle cx="72" cy="76" r="18" fill={ab} stroke={c} strokeWidth="2.5"/>
+      <path d="M66 76 q5 4 10 0" stroke={c} strokeWidth="2" strokeLinecap="round" fill="none"/>
+      <path d="M90 84 L168 88" stroke={c} strokeWidth="5" strokeLinecap="round"/>
+      <path d="M168 88 L232 95" stroke={c} strokeWidth="5" strokeLinecap="round"/>
+      <path d="M160 86 L194 60 L234 70" stroke={a} strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+      <path d="M94 86 Q80 96 62 96" stroke={c} strokeWidth="4" strokeLinecap="round" fill="none"/>
     </svg>,
   ];
 
@@ -294,12 +289,13 @@ function LearnScreen({ t, s, L }) {
         <div style={{
           fontFamily:'ui-monospace, SFMono-Regular, Menlo, monospace',
           fontSize:s.small, color:t.mute, letterSpacing:1.5, marginBottom:10,
-        }}>REVERSING AN OVERDOSE</div>
+        }}>NALOXONE BASICS</div>
         <div style={{
           fontFamily:'"Instrument Serif", ui-serif, Georgia, serif',
           fontSize:s.h1+4, lineHeight:1.0, letterSpacing:-0.8,
-        }}>Six steps.<br/>Two minutes.<br/>
-          <span style={{color:t.accent, fontStyle:'italic'}}>One life.</span>
+        }}>How to reverse<br/>an overdose.</div>
+        <div style={{fontSize:s.body, color:t.mute, marginTop:10, lineHeight:1.5}}>
+          Six steps with naloxone, about two minutes.
         </div>
       </div>
 
@@ -558,8 +554,7 @@ function BuddyScreen({ t, s, L }) {
             borderRadius:16, padding:'4px 16px', marginBottom:20,
           }}>
             {[
-              { name: 'Maya (my sister)', num: '··· ··· 4821', active: true },
-              { name: 'Never Use Alone hotline', num: '1-800-484-3731', active: false },
+              { name: 'Never Use Alone hotline', num: '1-800-484-3731', active: true },
               { name: 'Add someone…', num: null, active: false, add:true },
             ].map((p, i, arr) => (
               <div key={i} style={{
@@ -693,7 +688,7 @@ function NowScreen({ t, s, L, onGoTo }) {
       <div style={{
         fontFamily:'"Instrument Serif", ui-serif, Georgia, serif',
         fontSize:s.h1+4, lineHeight:1.05, letterSpacing:-0.6, marginBottom:20,
-      }}>Breathe.<br/>You're not alone.</div>
+      }}>Get help<br/>right now.</div>
 
       {/* 911 */}
       <button onClick={() => window.location.href='tel:911'} style={{
