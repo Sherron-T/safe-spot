@@ -612,6 +612,57 @@ const SEED_LOCATIONS = [
     note: 'Full-service harm reduction. Ferry to St. George then 5 min walk.',
     lat: 40.6359, lng: -74.0776,
   },
+  {
+    id: 'loc-youth-1',
+    name: 'The Door',
+    neighborhood: 'SoHo',
+    org: 'The Door — A Center of Alternatives',
+    addr: '555 Broome St, New York, NY 10013',
+    x: 52, y: 66,
+    services: ['Narcan', 'Youth'],
+    languages: ['EN', 'ES'],
+    hours: { mon: '2–6', tue: '2–6', wed: '2–6', thu: '2–6', fri: '2–6', sat: 'Closed', sun: 'Closed' },
+    openNow: false, closesSoon: false,
+    walk: 12, transit: 7,
+    phone: '212-941-9090',
+    access: ['Wheelchair', 'All genders', 'LGBTQ+ affirming'],
+    note: 'Ages 12–24 only. Free health care, hot meals, counseling, and legal help under one roof.',
+    lat: 40.7242, lng: -74.0040,
+  },
+  {
+    id: 'loc-youth-2',
+    name: 'Streetwork Project Drop-In (Harlem)',
+    neighborhood: 'Harlem',
+    org: 'Safe Horizon',
+    addr: '209 W 125th St, New York, NY 10027',
+    x: 44, y: 30,
+    services: ['SEP', 'Narcan', 'Youth'],
+    languages: ['EN', 'ES'],
+    hours: { mon: '9–5', tue: '9–5', wed: '9–5', thu: '9–5', fri: '9–5', sat: 'Closed', sun: 'Closed' },
+    openNow: false, closesSoon: false,
+    walk: 26, transit: 16,
+    phone: '212-695-2220',
+    access: ['All genders', 'LGBTQ+ affirming'],
+    note: 'For youth 24 and under. Drop-in with meals, showers, lockers, and harm reduction supplies. Call ahead to confirm hours.',
+    lat: 40.8090, lng: -73.9482,
+  },
+  {
+    id: 'loc-youth-3',
+    name: 'Ali Forney Center Drop-In',
+    neighborhood: 'Harlem',
+    org: 'Ali Forney Center',
+    addr: '321 W 125th St, New York, NY 10027',
+    x: 43, y: 29,
+    services: ['Narcan', 'Youth'],
+    languages: ['EN', 'ES'],
+    hours: { mon: '9–9', tue: '9–9', wed: '9–9', thu: '9–9', fri: '9–9', sat: '9–5', sun: '9–5' },
+    openNow: false, closesSoon: false,
+    walk: 27, transit: 17,
+    phone: '212-206-0574',
+    access: ['All genders', 'LGBTQ+ affirming'],
+    note: 'For LGBTQ+ youth 16–24. Meals, showers, medical care, and housing help. Call ahead to confirm hours.',
+    lat: 40.8101, lng: -73.9520,
+  },
 ];
 
 // ─── Map the NYC Health Map API response shape to our location shape ──────────
@@ -670,9 +721,14 @@ async function fetchNYCLocations() {
     const data = await res.json();
     const items = Array.isArray(data) ? data : (data.results || data.features || data.data || []);
     if (items.length > 0) {
-      LOCATIONS = items.map(parseApiLocation)
-        .filter(l => l.name)
-        .map(l => Object.assign(l, computeOpenNow(l)));
+      // Youth-serving sites aren't in the city API — always keep them in the list
+      const youthSites = SEED_LOCATIONS.filter(l => l.services.includes('Youth'));
+      LOCATIONS = [
+        ...youthSites,
+        ...items.map(parseApiLocation)
+          .filter(l => l.name)
+          .map(l => Object.assign(l, computeOpenNow(l))),
+      ];
       window.__locationsLoaded && window.__locationsLoaded(LOCATIONS);
     }
   } catch (e) {
@@ -864,6 +920,7 @@ const SERVICE_META = {
   Narcan: { icon: 'spray',   label: { EN: 'Naloxone',         ES: 'Naloxona', ZH: '纳洛酮' } },
   'Test strips': { icon: 'strip', label: { EN: 'Test strips', ES: 'Tiras',    ZH: '检测试纸' } },
   'Wound care':  { icon: 'bandage', label: { EN: 'Wound care', ES: 'Heridas', ZH: '伤口护理' } },
+  Youth:  { icon: 'heart', label: { EN: 'Youth 16–24', ES: 'Jóvenes 16–24', ZH: '青年 16–24' } },
 };
 
 Object.assign(window, { LOCATIONS, SEED_LOCATIONS, BOROUGH_PATHS, STREETS, Icon, SERVICE_META, fetchNYCLocations, distanceMiles, walkMinutes });

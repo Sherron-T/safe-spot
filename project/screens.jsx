@@ -65,7 +65,7 @@ function PrivacyBadge({ t, s, L, onDismiss }) {
 // ────────────────────────────────────────────────────────────
 // MAP SCREEN
 // ────────────────────────────────────────────────────────────
-const FILTERS = ['All', 'SEP', 'Narcan', 'Test strips', 'Wound care'];
+const FILTERS = ['All', 'Youth', 'SEP', 'Narcan', 'Test strips', 'Wound care'];
 
 function MapScreen({ t, s, L, tweaks, filter, setFilter, onOpen, saved, toggleSave, sheetLoc, setSheetLoc, locations, userLocation, locating, requestLocation, activeRoute, clearRoute, onDirections }) {
   const locs = locations || LOCATIONS;
@@ -78,6 +78,7 @@ function MapScreen({ t, s, L, tweaks, filter, setFilter, onOpen, saved, toggleSa
     if (f === 'Narcan') return L.filterNarcan;
     if (f === 'Test strips') return L.filterTest;
     if (f === 'Wound care') return L.filterWound;
+    if (f === 'Youth') return L.filterYouth;
   };
 
   const q = query.toLowerCase().trim();
@@ -97,9 +98,9 @@ function MapScreen({ t, s, L, tweaks, filter, setFilter, onOpen, saved, toggleSa
         filter={filter} onPin={setSheetLoc} userLocation={userLocation}
         activeRoute={activeRoute}/>
 
-      {/* Near me button */}
+      {/* Near me button — sits below the search + filter rows */}
       <button onClick={requestLocation} style={{
-        position:'absolute', right:12, top:112, zIndex:25,
+        position:'absolute', right:12, top:160, zIndex:25,
         width:40, height:40, borderRadius:20,
         background:t.surface, border:`1px solid ${t.border}`,
         boxShadow:'0 4px 12px rgba(0,0,0,0.12)',
@@ -181,7 +182,7 @@ function MapScreen({ t, s, L, tweaks, filter, setFilter, onOpen, saved, toggleSa
         </div>
       </div>
 
-      {/* bottom sheet: either a hint or a location preview */}
+      {/* bottom sheet: location preview, or nearby list (hidden while a route is shown) */}
       {sheetLoc ? (
         <LocationPeek t={t} s={s} L={L} loc={sheetLoc}
           onOpen={() => onOpen(sheetLoc)}
@@ -190,7 +191,7 @@ function MapScreen({ t, s, L, tweaks, filter, setFilter, onOpen, saved, toggleSa
           toggleSave={() => toggleSave(sheetLoc.id)}
           userLocation={userLocation}
           onDirections={onDirections} />
-      ) : (
+      ) : activeRoute ? null : (
         <NearbySheet t={t} s={s} L={L} locations={visible} onOpen={setSheetLoc} userLocation={userLocation}/>
       )}
     </div>

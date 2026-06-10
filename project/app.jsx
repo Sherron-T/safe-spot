@@ -57,8 +57,9 @@ function App() {
       ? `https://maps.apple.com/?saddr=${fromLat},${fromLng}&daddr=${loc.lat},${loc.lng}&dirflg=w`
       : `https://www.google.com/maps/dir/?api=1&origin=${fromLat},${fromLng}&destination=${loc.lat},${loc.lng}&travelmode=walking`;
 
-    // Close detail, go to map immediately; route loads async
+    // Close detail + peek, go to map immediately; route loads async
     setDetail(null);
+    setSheetLoc(null);
     setTab('map');
 
     // Straight-line fallback (used if OSRM fails)
@@ -144,16 +145,17 @@ function App() {
             fontFamily: '"Instrument Serif", ui-serif, Georgia, serif',
             fontSize: 42, lineHeight: 1.05, letterSpacing: -1,
             color: t.ink, marginBottom: 18,
-          }}>Free harm reduction,<br/>mapped across NYC.</div>
+          }}>Harm reduction,<br/>built for young<br/>New Yorkers.</div>
           <div style={{ fontSize: 15, color: t.mute, lineHeight: 1.7, marginBottom: 28 }}>
-            Safe Spot maps free harm reduction services across NYC: syringe exchanges, naloxone,
-            fentanyl test strips, and wound care. No account, no tracking.
+            Safe Spot maps free harm reduction services across NYC for transitional-age
+            youth (16–24): naloxone, syringe exchanges, fentanyl test strips, wound care,
+            and youth drop-in centers. No account, no tracking.
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 32 }}>
             {[
+              ['heart', 'Youth-only sites: no ID or parental consent'],
               ['map', '20+ verified NYC sites'],
               ['bolt', 'Live open / closed status'],
-              ['walk', 'Sorted by distance from you'],
               ['lock', 'No account, no tracking'],
             ].map(([icon, text]) => (
               <div key={text} style={{
@@ -217,25 +219,9 @@ function App() {
             <NowScreen t={t} s={s} L={L} onGoTo={(x) => setTab(x)} />
           ) : null}
 
-          {tab === 'map' && !detail && (
+          {tab === 'map' && !detail && !sheetLoc && activeRoute && routeStripVisible && (
             <div style={{
-              position: 'absolute', top: 14, left: 0, right: 0,
-              display: 'flex', justifyContent: 'center', pointerEvents: 'none',
-              zIndex: 15,
-            }}>
-              <div style={{
-                padding: '3px 10px', borderRadius: 999,
-                background: t.dark ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.75)',
-                backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)',
-                fontSize: 10, color: t.mute, letterSpacing: 1.5,
-                fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
-              }}>SAFE · SPOT</div>
-            </div>
-          )}
-
-          {tab === 'map' && !detail && activeRoute && routeStripVisible && (
-            <div style={{
-              position:'absolute', bottom: sheetLoc ? 300 : 88, left:12, right:12, zIndex:40,
+              position:'absolute', bottom: 88, left:12, right:12, zIndex:40,
               background: t.dark ? 'rgba(28,24,20,0.96)' : 'rgba(255,255,255,0.97)',
               backdropFilter:'blur(14px)', WebkitBackdropFilter:'blur(14px)',
               borderRadius:18, padding:'12px 14px',
@@ -268,7 +254,7 @@ function App() {
                 border:'none', borderRadius:10, fontSize:s.small+1, fontWeight:600,
                 fontFamily:'inherit', cursor:'pointer', flexShrink:0, whiteSpace:'nowrap',
               }}>Open Maps</button>
-              <button onClick={() => setRouteStripVisible(false)} style={{
+              <button onClick={() => { setActiveRoute(null); setRouteStripVisible(false); }} style={{
                 width:28, height:28, borderRadius:14, background:t.surface,
                 border:`1px solid ${t.border}`, color:t.mute,
                 display:'grid', placeItems:'center', cursor:'pointer', flexShrink:0,
