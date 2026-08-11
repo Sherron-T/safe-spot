@@ -292,7 +292,7 @@ const NARCAN_STEPS = [
   { n: '06', title: 'Recovery position', body: "On their side, top knee bent, hand under head. Stay with them until help arrives." },
 ];
 
-function LearnScreen({ t, s, L }) {
+function LearnScreenLegacy({ t, s, L }) {
   const [step, setStep] = React.useState(0);
   return (
     <div style={{
@@ -529,6 +529,93 @@ function LearnScreen({ t, s, L }) {
   );
 }
 
+function LearnScreen({ t, s, L }) {
+  const [step, setStep] = React.useState(0);
+  const current = NARCAN_STEPS[step];
+  const facts = [
+    ['It cannot hurt to give naloxone', 'If you are not sure, give it anyway. Naloxone will not harm someone who is not overdosing.'],
+    ["New York's 911 protects you", 'Tell the dispatcher it may be an overdose. The Good Samaritan Law protects the caller and the person who needs help.'],
+    ['Carry two doses when you can', 'Some overdoses need a second dose. Keep both doses somewhere easy to reach.'],
+    ['Stay with them', 'Put the person on their side and stay until help arrives.'],
+  ];
+  const testSteps = [
+    ['Mix a small residue', 'Add water to the bag or surface the drug was on.'],
+    ['Dip the strip', 'Put the wavy end in the water for 15 seconds.'],
+    ['Wait 2 to 5 minutes', 'Lay the strip flat and do not touch the result window.'],
+    ['Read the result', 'One line means fentanyl was detected. Two lines means it was not detected. Never assume use is fully safe.'],
+  ];
+  const buttonStyle = (primary = false) => ({
+    flex: primary ? 1.35 : 1, height:s.tap, borderRadius:15,
+    background: primary ? t.accent : t.surface, color: primary ? t.surface : t.ink,
+    border: primary ? 'none' : `1px solid ${t.border}`,
+    fontFamily:'inherit', fontSize:s.h3, fontWeight:700, cursor:'pointer',
+    boxShadow: primary ? `0 8px 18px ${t.accent}33` : 'none',
+  });
+  const checklist = (items, color = t.open) => items.map((line, i) => (
+    <div key={i} style={{display:'flex', gap:8, alignItems:'flex-start', fontSize:s.small+1, color:t.ink, lineHeight:1.5, marginBottom:i < items.length - 1 ? 8 : 0}}>
+      <Icon.check width="13" height="13" style={{color, flexShrink:0, marginTop:2}}/>{line}
+    </div>
+  ));
+  return (
+    <div style={{position:'absolute', inset:0, background:t.bg, overflowY:'auto', color:t.ink, padding:'70px 0 110px'}}>
+      <div style={{padding:'0 20px 20px'}}>
+        <div style={{fontFamily:'ui-monospace, monospace', fontSize:s.small, color:t.accent, letterSpacing:1.8, marginBottom:10, fontWeight:700}}>LEARN AT YOUR PACE</div>
+        <div style={{fontFamily:'"Instrument Serif", ui-serif, Georgia, serif', fontSize:s.h1+4, lineHeight:1.0, letterSpacing:-0.8}}>Know what to do<br/>when it matters.</div>
+        <div style={{fontSize:s.body, color:t.mute, marginTop:10, lineHeight:1.5}}>A calm, plain-language guide to naloxone, test strips, and staying safer.</div>
+      </div>
+
+      <div style={{display:'flex', gap:5, padding:'0 20px 18px'}}>
+        {NARCAN_STEPS.map((st, i) => <button aria-label={`Step ${i + 1}: ${st.title}`} key={i} onClick={() => setStep(i)} style={{flex:1, height:6, borderRadius:5, padding:0, background:i <= step ? t.accent : t.faint, border:'none', cursor:'pointer'}}/>)}
+      </div>
+
+      <div style={{padding:'0 20px'}}>
+        <div style={{background:t.accent, borderRadius:25, padding:'22px 20px 18px', color:t.surface, boxShadow:`0 15px 28px ${t.accent}30`}}>
+          <div style={{fontSize:s.small, letterSpacing:1.7, marginBottom:12, fontWeight:700, opacity:.75}}>STEP {current.n} OF 06</div>
+          <div style={{fontFamily:'"Instrument Serif", ui-serif, Georgia, serif', fontSize:s.h1, lineHeight:1.05, letterSpacing:-0.4, marginBottom:12}}>{current.title}</div>
+          <div style={{fontSize:s.body+1, lineHeight:1.5, opacity:.9}}>{current.body}</div>
+          <div style={{marginTop:18, height:118, borderRadius:17, background:'rgba(255,255,255,.12)', overflow:'hidden', display:'flex', alignItems:'center', justifyContent:'center'}}><StepIllustration index={step} t={t}/></div>
+        </div>
+        <div style={{display:'flex', gap:8, marginTop:12}}>
+          <button onClick={() => setStep(Math.max(0, step - 1))} style={{...buttonStyle(), opacity:step === 0 ? .45 : 1}} disabled={step === 0}>Back</button>
+          <button onClick={() => setStep((step + 1) % NARCAN_STEPS.length)} style={buttonStyle(true)}>{step === NARCAN_STEPS.length - 1 ? 'Review again' : 'Next step'}</button>
+        </div>
+
+        <div style={{marginTop:28}}>
+          <SectionLabel t={t} s={s}>Good to know</SectionLabel>
+          <div style={{display:'grid', gap:9}}>{facts.map(([q, a], i) => <div key={i} style={{background:t.surface, borderRadius:17, border:`1px solid ${t.border}`, padding:'14px 15px'}}><div style={{fontSize:s.body, fontWeight:600, marginBottom:4}}>{q}</div><div style={{fontSize:s.small+1, color:t.mute, lineHeight:1.4}}>{a}</div></div>)}</div>
+        </div>
+
+        <div style={{marginTop:28}}>
+          <SectionLabel t={t} s={s}>Your rights in NYC</SectionLabel>
+          <div style={{background:t.openSoft, borderRadius:20, padding:'17px', border:`1px solid ${t.open}22`}}>
+            <div style={{fontSize:s.body, fontWeight:700, color:t.open, marginBottom:8}}>Calling for help is the right move.</div>
+            {checklist(['The Good Samaritan Law protects people who call 911 for an overdose.', 'Tell the dispatcher it may be an overdose so the right help arrives.', 'Stay with the person and follow the dispatcher’s instructions.'])}
+          </div>
+        </div>
+
+        <div style={{marginTop:28}}>
+          <SectionLabel t={t} s={s}>How to use test strips</SectionLabel>
+          <div style={{background:t.surface, borderRadius:20, border:`1px solid ${t.border}`, padding:'6px 16px'}}>
+            {testSteps.map(([title, desc], i) => <div key={i} style={{padding:'12px 0', borderBottom:i < testSteps.length - 1 ? `1px solid ${t.faint}` : 'none'}}><div style={{display:'flex', gap:10, alignItems:'flex-start'}}><div style={{width:22, height:22, borderRadius:11, background:t.accentSoft, color:t.accent, display:'grid', placeItems:'center', flexShrink:0, fontFamily:'ui-monospace, monospace', fontSize:s.small, fontWeight:700}}>{i + 1}</div><div><div style={{fontSize:s.body, fontWeight:600, marginBottom:2}}>{title}</div><div style={{fontSize:s.small+1, color:t.mute, lineHeight:1.4}}>{desc}</div></div></div></div>)}
+          </div>
+          <div style={{marginTop:10, padding:'10px 14px', borderRadius:10, background:t.urgentSoft, fontSize:s.small+1, color:t.ink, lineHeight:1.5}}><strong>A negative result is not a guarantee.</strong> Fentanyl can be unevenly distributed. Never use alone.</div>
+        </div>
+
+        <div style={{marginTop:28, marginBottom:8}}>
+          <SectionLabel t={t} s={s}>For young people (16–24)</SectionLabel>
+          <div style={{background:t.openSoft, borderRadius:20, padding:'17px', border:`1px solid ${t.open}22`, marginBottom:10}}>
+            <div style={{fontSize:s.body, fontWeight:700, color:t.open, marginBottom:8}}>You can ask for help on your own.</div>
+            {checklist(['Naloxone is available at any age. No ID or prescription is needed.', 'In New York, you can consent to your own substance use care without a parent.', 'Youth drop-in centers offer meals, showers, lockers, and someone to talk to, free.', 'Use the Youth 16–24 filter on the map to find sites made for you.'])}
+          </div>
+          <div style={{background:t.surface, borderRadius:20, border:`1px solid ${t.border}`, padding:'4px 16px'}}>
+            {[{name:'Crisis Text Line', detail:'Text HOME to 741741 · Free, 24/7', href:'sms:741741?body=HOME'}, {name:'The Trevor Project', detail:'1-866-488-7386 · Free, 24/7', href:'tel:18664887386'}, {name:'988 Mental Health Line', detail:'Call or text 988 · Free, 24/7', href:'tel:988'}, {name:'National Runaway Safeline', detail:'1-800-786-2929 · Free, 24/7', href:'tel:18007862929'}].map((h, i, arr) => <button key={i} onClick={() => window.location.href = h.href} style={{width:'100%', display:'flex', alignItems:'center', gap:12, padding:'13px 0', background:'transparent', border:'none', borderBottom:i < arr.length - 1 ? `1px solid ${t.faint}` : 'none', textAlign:'left', cursor:'pointer', color:t.ink, fontFamily:'inherit'}}><div style={{width:34, height:34, borderRadius:17, background:t.accentSoft, color:t.accent, display:'grid', placeItems:'center', flexShrink:0}}><Icon.phone width="16" height="16"/></div><div style={{flex:1}}><div style={{fontSize:s.body, fontWeight:600}}>{h.name}</div><div style={{fontSize:s.small+1, color:t.mute, marginTop:1}}>{h.detail}</div></div><Icon.chevron width="16" height="16" style={{color:t.mute}}/></button>)}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ────────────────────────────────────────────────────────────
 // BUDDY
 // ────────────────────────────────────────────────────────────
@@ -654,7 +741,7 @@ function BuddyScreen({ t, s, L }) {
         color: active ? t.urgent : t.surface,
         border:'none', fontFamily:'inherit', fontSize:s.h2, fontWeight:600,
         letterSpacing:-0.3, cursor:'pointer',
-      }}>{active ? 'I\'m okay — stop timer' : L.startBuddy}</button>
+      }}>{active ? 'I\'m okay: stop timer' : L.startBuddy}</button>
 
       {!active && (
         <div style={{

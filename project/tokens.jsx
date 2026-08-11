@@ -10,7 +10,7 @@ const THEMES = {
     mute:      'oklch(0.52 0.02 40)',
     faint:     'oklch(0.90 0.01 60)',
     border:    'oklch(0.89 0.012 65)',
-    accent:    'oklch(0.62 0.14 40)',    // terracotta
+    accent:    'oklch(0.62 0.14 40)',
     accentSoft:'oklch(0.93 0.04 45)',
     open:      'oklch(0.62 0.13 150)',   // calm green
     openSoft:  'oklch(0.93 0.05 150)',
@@ -68,7 +68,7 @@ const STRINGS = {
     filterAll: 'All', filterSEP: 'Syringe exchange', filterNarcan: 'Naloxone', filterTest: 'Test strips', filterWound: 'Wound care', filterYouth: 'Youth 16–24',
     hereNow: 'Near you',
     privacyTitle: 'No account. No tracking.',
-    privacyBody: "We don't ask for your name, phone, or location history. Nothing you do here is shared — with anyone.",
+    privacyBody: "We don't ask for your name, phone, or location history. Nothing you do here is shared with anyone.",
     privacyCta: 'Got it',
     emergency: 'I need help now',
     getNarcan: 'Get free naloxone',

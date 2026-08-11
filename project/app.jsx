@@ -114,49 +114,50 @@ function App() {
       boxSizing: 'border-box', overflowY: 'auto',
     }}>
       {/* ── Header ── */}
-      <header style={{
+      <header className="showcase-header" style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '20px 40px', flexShrink: 0,
+        padding: '28px 40px 12px', flexShrink: 0,
       }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <span className="brand-mark">S</span>
           <span style={{
-            fontFamily: '"Instrument Serif", ui-serif, Georgia, serif',
-            fontSize: 26, color: t.ink, letterSpacing: -0.5,
+            fontFamily: '"Inter", -apple-system, system-ui, sans-serif',
+            fontSize: 21, color: t.ink, letterSpacing: -0.7, fontWeight: 700,
           }}>Safe Spot</span>
-          <span style={{
-            fontSize: 11, color: t.mute, letterSpacing: 1.5,
-            fontFamily: 'ui-monospace, monospace',
-          }}>NYC</span>
         </div>
         <span style={{
-          fontSize: 11, padding: '5px 12px', borderRadius: 20,
-          background: t.accentSoft, color: t.accent, fontWeight: 600, letterSpacing: 0.5,
+          fontSize: 11, padding: '8px 12px', borderRadius: 20,
+          background: t.accentSoft, color: t.accent, fontWeight: 700, letterSpacing: 0.4,
+          border: `1px solid ${t.border}`,
         }}>YALE HACKATHON</span>
       </header>
 
       {/* ── Main row: about + phone + tweaks ── */}
-      <div style={{
+      <div className="showcase-row" style={{
         flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
-        gap: 48, padding: '0 40px 32px', flexWrap: 'wrap',
+        gap: 64, padding: '24px 40px 44px', flexWrap: 'wrap',
       }}>
         {/* About panel */}
-        <div style={{ maxWidth: 300, flexShrink: 0 }}>
+        <div className="showcase-copy" style={{ maxWidth: 390, flexShrink: 0 }}>
+          <div style={{
+            fontSize: 11, color: t.accent, letterSpacing: 2.2,
+            fontWeight: 700, marginBottom: 14,
+          }}>SAFE SPOT APP</div>
           <div style={{
             fontFamily: '"Instrument Serif", ui-serif, Georgia, serif',
-            fontSize: 42, lineHeight: 1.05, letterSpacing: -1,
-            color: t.ink, marginBottom: 18,
-          }}>Harm reduction,<br/>built for young<br/>New Yorkers.</div>
-          <div style={{ fontSize: 15, color: t.mute, lineHeight: 1.7, marginBottom: 28 }}>
-            Safe Spot maps free harm reduction services across NYC for transitional-age
-            youth (16–24): naloxone, syringe exchanges, fentanyl test strips, wound care,
-            and youth drop-in centers. No account, no tracking.
+            fontSize: 64, lineHeight: .98, letterSpacing: -2.6,
+            color: t.ink, marginBottom: 22,
+          }}>A web demo<br/>of the Safe Spot<br/>iOS app.</div>
+          <div style={{ fontSize: 17, color: t.mute, lineHeight: 1.6, marginBottom: 24, maxWidth: 360 }}>
+            Safe Spot helps young New Yorkers find free naloxone, syringe exchange,
+            test strips, wound care, and drop-in support across the city.
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 32 }}>
             {[
-              ['heart', 'Youth-only sites: no ID or parental consent'],
-              ['map', '20+ verified NYC sites'],
-              ['bolt', 'Live open / closed status'],
-              ['lock', 'No account, no tracking'],
+              ['heart', 'Youth-friendly sites with no judgment'],
+              ['map', 'Free services across all five boroughs'],
+              ['bolt', 'Open and closed status at a glance'],
+              ['lock', 'Private by design'],
             ].map(([icon, text]) => (
               <div key={text} style={{
                 display: 'flex', alignItems: 'center', gap: 10,
@@ -176,9 +177,9 @@ function App() {
             padding: '12px 14px', borderRadius: 10,
             background: t.dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
           }}>
-            DATA SOURCE<br/>
-            NYC DOHMH Syringe Service Programs<br/>
-            NYC Health + Hospitals
+            BUILT AROUND REAL NEEDS<br/>
+            Clear information, low-pressure choices<br/>
+            No account required
           </div>
         </div>
 
@@ -281,13 +282,17 @@ function App() {
         fontSize: 12, color: t.mute, lineHeight: 1.6,
         borderTop: `1px solid ${t.border}`,
       }}>
-        Built at the Yale Hackathon · Data: NYC DOHMH · No location data is stored or shared
+        Private by design · NYC harm reduction resources · Demo data stays in this browser
       </footer>
 
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&display=swap');
         * { -webkit-font-smoothing: antialiased; box-sizing: border-box; }
         ::-webkit-scrollbar { display: none; }
+        .brand-mark { display:grid; place-items:center; width:34px; height:34px; background:${t.ink}; color:${t.surface}; border-radius:11px; font-family:"Instrument Serif", Georgia, serif; font-size:24px; }
+        .live-dot { display:inline-block; width:7px; height:7px; border-radius:50%; background:${t.open}; margin-right:5px; }
+        @media (max-width: 900px) { .showcase-row { gap: 34px !important; } .showcase-copy { max-width: 560px !important; text-align: center; } }
+        @media (max-width: 560px) { .showcase-header { padding: 20px 20px 8px !important; } .showcase-header > span { font-size: 9px !important; padding: 7px 8px !important; } .showcase-row { padding: 20px 20px 32px !important; } .showcase-copy > div:nth-child(2) { font-size: 48px !important; } }
         @keyframes screenIn {
           from { opacity: 0; transform: translateY(12px); }
           to   { opacity: 1; transform: translateY(0); }
