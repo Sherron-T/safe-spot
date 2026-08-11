@@ -67,7 +67,7 @@ function PrivacyBadge({ t, s, L, onDismiss }) {
 // ────────────────────────────────────────────────────────────
 const FILTERS = ['All', 'Youth', 'SEP', 'Narcan', 'Test strips', 'Wound care'];
 
-function MapScreen({ t, s, L, tweaks, filter, setFilter, onOpen, saved, toggleSave, sheetLoc, setSheetLoc, locations, userLocation, locating, requestLocation, activeRoute, clearRoute, onDirections }) {
+function MapScreen({ t, s, L, tweaks, filter, setFilter, onOpen, saved, toggleSave, sheetLoc, setSheetLoc, locations, userLocation, locating, locationMessage, requestLocation, activeRoute, clearRoute, onDirections }) {
   const locs = locations || LOCATIONS;
   const [query, setQuery] = React.useState('');
   const [searchFocused, setSearchFocused] = React.useState(false);
@@ -113,6 +113,14 @@ function MapScreen({ t, s, L, tweaks, filter, setFilter, onOpen, saved, toggleSa
         }
       </button>
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+
+      {locationMessage && (
+        <div style={{
+          position:'absolute', left:12, right:12, top:207, zIndex:24,
+          padding:'8px 11px', borderRadius:11, background:'rgba(255,255,255,.93)',
+          color:t.mute, fontSize:s.small, lineHeight:1.35, boxShadow:'0 4px 14px rgba(0,0,0,.08)',
+        }}>{locationMessage}</div>
+      )}
 
       {/* top bar */}
       <div style={{

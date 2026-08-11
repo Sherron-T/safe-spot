@@ -11,7 +11,6 @@ const DEFAULTS = {
 
 function App() {
   const [tweaks, setTweaks] = React.useState(DEFAULTS);
-  const [showTweaks, setShowTweaks] = React.useState(false);
 
   const [tab, setTab] = React.useState('map');
   const [showPrivacy, setShowPrivacy] = React.useState(true);
@@ -20,8 +19,11 @@ function App() {
   const [detail, setDetail] = React.useState(null);
   const [saved, setSaved] = React.useState([]);
   const [locations, setLocations] = React.useState(LOCATIONS);
+  const [dataSource, setDataSource] = React.useState('Built-in NYC directory');
+  const [directoryCheckedAt, setDirectoryCheckedAt] = React.useState(() => new Date().toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }));
   const [userLocation, setUserLocation] = React.useState(null);
   const [locating, setLocating] = React.useState(false);
+  const [locationMessage, setLocationMessage] = React.useState('');
   const [activeRoute, setActiveRoute] = React.useState(null); // {coords,distLabel,timeLabel,mapsUrl,locName}
   const [routeStripVisible, setRouteStripVisible] = React.useState(false);
 
@@ -31,16 +33,35 @@ function App() {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setLocationMessage('Showing services closest to you.');
         setLocating(false);
       },
-      () => setLocating(false),
+      () => {
+        setLocationMessage('Location is unavailable. You can still browse the map.');
+        setLocating(false);
+      },
       { timeout: 10000, maximumAge: 60000 }
     );
   }, []);
 
+  React.useEffect(() => {
+    try {
+      const prior = JSON.parse(window.localStorage.getItem('safe-spot-saved') || '[]');
+      if (Array.isArray(prior)) setSaved(prior);
+    } catch {}
+  }, []);
+
+  React.useEffect(() => {
+    window.localStorage.setItem('safe-spot-saved', JSON.stringify(saved));
+  }, [saved]);
+
   // Pick up live data if the API fetch succeeds after mount
   React.useEffect(() => {
-    window.__locationsLoaded = (locs) => setLocations(locs);
+    window.__locationsLoaded = (locs, source = 'NYC public directory') => {
+      setLocations(locs);
+      setDataSource(source);
+      setDirectoryCheckedAt(new Date().toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }));
+    };
     return () => { delete window.__locationsLoaded; };
   }, []);
 
@@ -100,6 +121,12 @@ function App() {
   const L = STRINGS[tweaks.lang] || STRINGS.EN;
 
   const updateTweak = (k, v) => setTweaks(prev => ({ ...prev, [k]: v }));
+  const openMap = () => {
+    setDetail(null);
+    setSheetLoc(null);
+    setTab('map');
+    setShowPrivacy(false);
+  };
 
   const pageBg = t.dark
     ? 'radial-gradient(ellipse at top, oklch(0.22 0.02 40) 0%, oklch(0.14 0.01 40) 80%)'
@@ -148,9 +175,16 @@ function App() {
             fontSize: 64, lineHeight: .98, letterSpacing: -2.6,
             color: t.ink, marginBottom: 22,
           }}>A web demo<br/>of the Safe Spot<br/>iOS app.</div>
-          <div style={{ fontSize: 17, color: t.mute, lineHeight: 1.6, marginBottom: 24, maxWidth: 360 }}>
+          <div style={{ fontSize: 17, color: t.mute, lineHeight: 1.6, marginBottom: 22, maxWidth: 360 }}>
             Safe Spot helps young New Yorkers find free naloxone, syringe exchange,
             test strips, wound care, and drop-in support across the city.
+          </div>
+          <div className="showcase-actions" style={{display:'flex', gap:10, flexWrap:'wrap', marginBottom:26}}>
+            <button onClick={openMap} style={{
+              minHeight:46, padding:'0 17px', borderRadius:14, border:'none',
+              background:t.ink, color:t.surface, fontFamily:'inherit', fontSize:14,
+              fontWeight:700, cursor:'pointer', boxShadow:`0 10px 20px ${t.ink}22`,
+            }}>Try the interactive demo</button>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 32 }}>
             {[
@@ -177,9 +211,10 @@ function App() {
             padding: '12px 14px', borderRadius: 10,
             background: t.dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
           }}>
-            BUILT AROUND REAL NEEDS<br/>
-            Clear information, low-pressure choices<br/>
-            No account required
+            <strong style={{display:'block', color:t.ink, fontSize:12, marginBottom:4}}>Designed for real life</strong>
+            {dataSource} · checked {directoryCheckedAt}<br/>
+            {locations.length} listed locations<br/>
+            Confirm hours before visiting. No account required.
           </div>
         </div>
 
@@ -204,6 +239,7 @@ function App() {
               locations={locations}
               userLocation={userLocation}
               locating={locating}
+              locationMessage={locationMessage}
               requestLocation={requestLocation}
               activeRoute={activeRoute}
               clearRoute={() => setActiveRoute(null)}
@@ -211,9 +247,9 @@ function App() {
           ) : tab === 'saved' ? (
             <SavedScreen t={t} s={s} L={L} saved={saved}
               onOpen={setDetail} toggleSave={toggleSave}
-              locations={locations} />
+              locations={locations} onBrowse={openMap} />
           ) : tab === 'learn' ? (
-            <LearnScreen t={t} s={s} L={L} />
+          <LearnScreen t={t} s={s} L={L} onFindNearby={openMap} />
           ) : tab === 'buddy' ? (
             <BuddyScreen t={t} s={s} L={L} />
           ) : tab === 'now' ? (
@@ -271,8 +307,7 @@ function App() {
         </div>
       </IOSDevice>
 
-      {/* Tweaks panel */}
-      <TweaksPanel tweaks={tweaks} update={updateTweak} />
+      <DisplayPanel tweaks={tweaks} update={updateTweak} />
 
       </div>{/* end main row */}
 
@@ -290,9 +325,11 @@ function App() {
         * { -webkit-font-smoothing: antialiased; box-sizing: border-box; }
         ::-webkit-scrollbar { display: none; }
         .brand-mark { display:grid; place-items:center; width:34px; height:34px; background:${t.ink}; color:${t.surface}; border-radius:11px; font-family:"Instrument Serif", Georgia, serif; font-size:24px; }
-        .live-dot { display:inline-block; width:7px; height:7px; border-radius:50%; background:${t.open}; margin-right:5px; }
-        @media (max-width: 900px) { .showcase-row { gap: 34px !important; } .showcase-copy { max-width: 560px !important; text-align: center; } }
-        @media (max-width: 560px) { .showcase-header { padding: 20px 20px 8px !important; } .showcase-header > span { font-size: 9px !important; padding: 7px 8px !important; } .showcase-row { padding: 20px 20px 32px !important; } .showcase-copy > div:nth-child(2) { font-size: 48px !important; } }
+        button { transition: transform .18s ease, box-shadow .18s ease, background .18s ease; }
+        button:hover:not(:disabled) { transform: translateY(-1px); }
+        button:focus-visible { outline: 3px solid ${t.accent}; outline-offset: 3px; }
+        @media (max-width: 900px) { .showcase-row { gap: 34px !important; } .showcase-copy { max-width: 560px !important; text-align: center; } .showcase-actions { justify-content:center; } }
+        @media (max-width: 560px) { .showcase-header { padding: 20px 20px 8px !important; } .showcase-header > span { font-size: 9px !important; padding: 7px 8px !important; } .showcase-row { padding: 20px 20px 32px !important; } .showcase-copy > div:nth-child(2) { font-size: 48px !important; } .showcase-actions { display:grid !important; grid-template-columns:1fr; } .showcase-actions button { width:100%; } .ios-device { width:calc(100vw - 32px) !important; height:calc((100vw - 32px) * 2.164) !important; } }
         @keyframes screenIn {
           from { opacity: 0; transform: translateY(12px); }
           to   { opacity: 1; transform: translateY(0); }
@@ -368,8 +405,8 @@ function TabBar({ t, s, L, tab, setTab }) {
   );
 }
 
-// ─── TWEAKS PANEL ─────────────────────────────────────────────────────────────
-function TweaksPanel({ tweaks, update }) {
+// ─── DISPLAY SETTINGS ────────────────────────────────────────────────────────
+function DisplayPanel({ tweaks, update }) {
   const Row = ({ label, children }) => (
     <div style={{ marginBottom: 14 }}>
       <div style={{
@@ -393,11 +430,10 @@ function TweaksPanel({ tweaks, update }) {
     </button>
   );
   return (
-    <div style={{
-      width: 260, background: '#fff', borderRadius: 20, padding: 18,
-      boxShadow: '0 20px 60px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.05)',
-      fontFamily: '"Inter", system-ui, sans-serif', color: '#1a1a1a',
-      alignSelf: 'center', flexShrink: 0,
+    <aside className="display-panel" style={{
+      width: 260, maxWidth:'100%', background: '#fff', borderRadius: 22, padding: 20,
+      boxShadow: '0 24px 80px rgba(0,0,0,0.24), 0 0 0 1px rgba(0,0,0,0.05)',
+      fontFamily: '"Inter", system-ui, sans-serif', color: '#1a1a1a', alignSelf:'center', flexShrink:0,
     }}>
       <div style={{
         display: 'flex', alignItems: 'baseline', justifyContent: 'space-between',
@@ -406,7 +442,7 @@ function TweaksPanel({ tweaks, update }) {
         <div style={{
           fontFamily: '"Instrument Serif", ui-serif, Georgia, serif',
           fontSize: 22, letterSpacing: -0.3,
-        }}>Tweaks</div>
+        }}>Display & language</div>
         <div style={{
           fontSize: 10, color: '#888', letterSpacing: 1.2,
           fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
@@ -428,7 +464,7 @@ function TweaksPanel({ tweaks, update }) {
         <Chip active={!tweaks.bigText} onClick={() => update('bigText', false)}>Normal</Chip>
         <Chip active={tweaks.bigText} onClick={() => update('bigText', true)}>Large</Chip>
       </Row>
-    </div>
+    </aside>
   );
 }
 

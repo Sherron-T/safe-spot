@@ -529,8 +529,9 @@ function LearnScreenLegacy({ t, s, L }) {
   );
 }
 
-function LearnScreen({ t, s, L }) {
+function LearnScreen({ t, s, L, onFindNearby }) {
   const [step, setStep] = React.useState(0);
+  const [completed, setCompleted] = React.useState(false);
   const current = NARCAN_STEPS[step];
   const facts = [
     ['It cannot hurt to give naloxone', 'If you are not sure, give it anyway. Naloxone will not harm someone who is not overdosing.'],
@@ -556,6 +557,10 @@ function LearnScreen({ t, s, L }) {
       <Icon.check width="13" height="13" style={{color, flexShrink:0, marginTop:2}}/>{line}
     </div>
   ));
+  const advance = () => {
+    if (step === NARCAN_STEPS.length - 1) setCompleted(true);
+    else setStep(step + 1);
+  };
   return (
     <div style={{position:'absolute', inset:0, background:t.bg, overflowY:'auto', color:t.ink, padding:'70px 0 110px'}}>
       <div style={{padding:'0 20px 20px'}}>
@@ -565,19 +570,26 @@ function LearnScreen({ t, s, L }) {
       </div>
 
       <div style={{display:'flex', gap:5, padding:'0 20px 18px'}}>
-        {NARCAN_STEPS.map((st, i) => <button aria-label={`Step ${i + 1}: ${st.title}`} key={i} onClick={() => setStep(i)} style={{flex:1, height:6, borderRadius:5, padding:0, background:i <= step ? t.accent : t.faint, border:'none', cursor:'pointer'}}/>)}
+        {NARCAN_STEPS.map((st, i) => <button aria-label={`Step ${i + 1}: ${st.title}`} key={i} onClick={() => { setCompleted(false); setStep(i); }} style={{flex:1, height:6, borderRadius:5, padding:0, background:completed || i <= step ? t.accent : t.faint, border:'none', cursor:'pointer'}}/>)}
       </div>
 
       <div style={{padding:'0 20px'}}>
-        <div style={{background:t.accent, borderRadius:25, padding:'22px 20px 18px', color:t.surface, boxShadow:`0 15px 28px ${t.accent}30`}}>
+        {completed ? (
+          <div style={{background:t.openSoft, border:`1px solid ${t.open}33`, borderRadius:25, padding:'26px 20px 22px', color:t.ink, textAlign:'center', boxShadow:`0 15px 28px ${t.open}18`}}>
+            <div style={{width:48, height:48, borderRadius:24, background:t.open, color:'#fff', margin:'0 auto 14px', display:'grid', placeItems:'center'}}><Icon.check width="24" height="24"/></div>
+            <div style={{fontFamily:'"Instrument Serif", ui-serif, Georgia, serif', fontSize:s.h1+2, lineHeight:1.05, letterSpacing:-.5, marginBottom:8}}>You finished the basics.</div>
+            <div style={{fontSize:s.body, color:t.mute, lineHeight:1.5}}>You know the key steps. Keep two doses nearby, call 911, and stay with the person.</div>
+            <button onClick={onFindNearby} style={{width:'100%', minHeight:s.tap, marginTop:20, borderRadius:15, border:'none', background:t.open, color:'#fff', fontFamily:'inherit', fontSize:s.body, fontWeight:700, cursor:'pointer'}}>Find naloxone near me</button>
+          </div>
+        ) : <div style={{background:t.accent, borderRadius:25, padding:'22px 20px 18px', color:t.surface, boxShadow:`0 15px 28px ${t.accent}30`}}>
           <div style={{fontSize:s.small, letterSpacing:1.7, marginBottom:12, fontWeight:700, opacity:.75}}>STEP {current.n} OF 06</div>
           <div style={{fontFamily:'"Instrument Serif", ui-serif, Georgia, serif', fontSize:s.h1, lineHeight:1.05, letterSpacing:-0.4, marginBottom:12}}>{current.title}</div>
           <div style={{fontSize:s.body+1, lineHeight:1.5, opacity:.9}}>{current.body}</div>
           <div style={{marginTop:18, height:118, borderRadius:17, background:'rgba(255,255,255,.12)', overflow:'hidden', display:'flex', alignItems:'center', justifyContent:'center'}}><StepIllustration index={step} t={t}/></div>
-        </div>
+        </div>}
         <div style={{display:'flex', gap:8, marginTop:12}}>
-          <button onClick={() => setStep(Math.max(0, step - 1))} style={{...buttonStyle(), opacity:step === 0 ? .45 : 1}} disabled={step === 0}>Back</button>
-          <button onClick={() => setStep((step + 1) % NARCAN_STEPS.length)} style={buttonStyle(true)}>{step === NARCAN_STEPS.length - 1 ? 'Review again' : 'Next step'}</button>
+          <button onClick={() => completed ? (setCompleted(false), setStep(0)) : setStep(Math.max(0, step - 1))} style={{...buttonStyle(), opacity:step === 0 && !completed ? .45 : 1}} disabled={step === 0 && !completed}> {completed ? 'Review guide' : 'Back'}</button>
+          <button onClick={advance} style={{...buttonStyle(true), opacity:completed ? .45 : 1}} disabled={completed}>{step === NARCAN_STEPS.length - 1 ? 'Finish guide' : 'Next step'}</button>
         </div>
 
         <div style={{marginTop:28}}>
@@ -758,7 +770,7 @@ function BuddyScreen({ t, s, L }) {
 // ────────────────────────────────────────────────────────────
 // SAVED
 // ────────────────────────────────────────────────────────────
-function SavedScreen({ t, s, L, saved, onOpen, toggleSave, locations }) {
+function SavedScreen({ t, s, L, saved, onOpen, toggleSave, locations, onBrowse }) {
   const list = (locations || LOCATIONS).filter(l => saved.includes(l.id));
   return (
     <div style={{
@@ -786,6 +798,11 @@ function SavedScreen({ t, s, L, saved, onOpen, toggleSave, locations }) {
           <div style={{fontSize:s.body, color:t.mute, lineHeight:1.5}}>
             Tap the star on any location to keep it here for later.
           </div>
+          <button onClick={onBrowse} style={{
+            marginTop:18, minHeight:s.tap, padding:'0 16px', borderRadius:14,
+            border:'none', background:t.accent, color:t.surface, fontFamily:'inherit',
+            fontSize:s.body, fontWeight:700, cursor:'pointer',
+          }}>Browse nearby services</button>
         </div>
       ) : (
         <div style={{padding:'0 16px'}}>

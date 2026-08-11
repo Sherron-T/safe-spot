@@ -729,11 +729,12 @@ async function fetchNYCLocations() {
           .filter(l => l.name)
           .map(l => Object.assign(l, computeOpenNow(l))),
       ];
-      window.__locationsLoaded && window.__locationsLoaded(LOCATIONS);
+      window.__locationsLoaded && window.__locationsLoaded(LOCATIONS, 'NYC public directory');
     }
   } catch (e) {
     // API unreachable (CORS, 403, offline) — seed data stays active
     console.info('Safe Spot: using built-in seed data (API unavailable)');
+    window.__locationsLoaded && window.__locationsLoaded(LOCATIONS, 'Built-in NYC directory');
   }
 }
 
